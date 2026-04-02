@@ -1,71 +1,92 @@
 #!/bin/bash
 
-# ==========================================================
-# simplePrompt.sh → Minimal Matrix-style Bash Prompt
-# ==========================================================
-#
-# WHAT THIS FILE IS:
-# This is NOT a script you "run" manually.
-# It is a shell configuration file that gets LOADED automatically
-# when a user logs in (if placed in /etc/profile.d/).
-#
-# ----------------------------------------------------------
-# 1) HOW TO USE / RUN THIS
-# ----------------------------------------------------------
-# Step 1: Copy this file into system profile directory:
-#   sudo cp simplePrompt.sh /etc/profile.d/
-#
-# Step 2: Set correct permissions:
-#   sudo chmod 644 /etc/profile.d/simplePrompt.sh
-#
-# Step 3: Apply immediately (without logout):
-#   source /etc/profile
-#
-# Step 4: Open new terminal OR login again
-#
-#  Now prompt will be active for ALL users permanently
-#
-# ----------------------------------------------------------
-# 2) IF NOT USING AS SCRIPT (ALTERNATIVE METHOD)
-# ----------------------------------------------------------
-# You can directly add this line into user config:
-#
-#   vim ~/.bashrc
-#
-# Add:
-#   export PS1="\[\e[1;32m\]\u \w\[\e[0m\]\n🐧 "
-#
-# Then apply:
-#   source ~/.bashrc
-#
-# ✔ This applies ONLY to that user (not system-wide)
-#
-# ----------------------------------------------------------
-#  IMPORTANT TECH NOTE
-# ----------------------------------------------------------
-# Avoid using $(pwd) in PS1 because:
-# - It becomes STATIC (updates only at login)
-# - Does NOT change when you cd into directories
-#
-#  Correct dynamic approach → use \w instead
-#
-# ----------------------------------------------------------
-# WHAT THIS PROMPT SHOWS
-# ----------------------------------------------------------
-# - Username
-# - Absolute working directory
-# - Green "Matrix" color
-# - New line for command
-# - 🐧 emoji before command
-#
-# ==========================================================
+# ==============================
+# Simple Prompt Installer
+# ==============================
 
+GREEN="\[\e[1;32m\]"
+RESET="\[\e[0m\]"
+PROMPT='export PS1="\[\e[1;32m\]\u \w\[\e[0m\]\n🐧 "'
 
-# Apply only for interactive bash shells
-case "$-" in
-    *i*) ;;
-      *) return ;;
+# Get script directory (robust path handling)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+clear
+
+# ==============================
+# SHOW BANNER (FIRST)
+# ==============================
+if [ -f "$SCRIPT_DIR/../bin/pic/banner.txt" ]; then
+    cat "$SCRIPT_DIR/../bin/pic/banner.txt"
+else
+    echo "⚠ Banner not found"
+fi
+
+echo ""
+echo "=============================="
+echo "  SIMPLE PROMPT INSTALLER"
+echo "=============================="
+echo "1) Permanent (All users)"
+echo "2) Temporary (Current session)"
+echo "3) User-only (~/.bashrc)"
+echo "4) Exit"
+echo "=============================="
+
+read -p "Choose option [1-4]: " choice
+
+case $choice in
+
+1)
+    echo "[*] Setting system-wide prompt..."
+
+    if [[ $EUID -ne 0 ]]; then
+        echo "❌ Run as root. Don't be lazy."
+        exit 1
+    fi
+
+    echo "$PROMPT" > /etc/profile.d/simplePrompt.sh
+    chmod 644 /etc/profile.d/simplePrompt.sh
+
+    # Ensure applied for all shells
+    if ! grep -q "simplePrompt" /etc/bashrc; then
+        echo "$PROMPT" >> /etc/bashrc
+    fi
+
+    source /etc/bashrc
+
+    echo "✅ Permanent prompt applied (all users)"
+    ;;
+
+2)
+    echo "[*] Applying temporary prompt..."
+
+    eval "$PROMPT"
+
+    echo "✅ Temporary prompt applied"
+    ;;
+
+3)
+    echo "[*] Applying user-only prompt..."
+
+    # Avoid duplicate entries
+    if ! grep -q "🐧" ~/.bashrc; then
+        echo "$PROMPT" >> ~/.bashrc
+    fi
+
+    source ~/.bashrc
+
+    echo "✅ Applied for current user"
+    ;;
+
+4)
+    echo "Bye. Stay efficient."
+    exit 0
+    ;;
+
+*)
+    echo "💀 Invalid input. Even bash expects better from you."
+    echo "👉 Run again and choose 1–4 properly."
+    exit 1
+    ;;
+
 esac
-
-# Set Matrix-style green prompt (DYNAMIC)
-export PS1="\[\e[1;32m\]\u \w\[\e[0m\]\n🐧 "
