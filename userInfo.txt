@@ -1,0 +1,216 @@
+#!/bin/bash
+
+# ==================================================
+# LINUX USER & GROUP MANAGEMENT - QUICK REFERENCE
+# ==================================================
+
+# -------------------------------
+# 1. UID (User ID)
+# -------------------------------
+# Unique number for each user
+
+# Ranges:
+# 0        → root user
+# 1–999    → system users
+# 1000+    → regular users
+
+# Check UID:
+id username
+
+# Example:
+id alpha
+
+
+# -------------------------------
+# 2. GID (Group ID)
+# -------------------------------
+# Unique number for each group
+
+# Ranges:
+# 0        → root group
+# 1–999    → system groups
+# 1000+    → regular groups
+
+# Check group:
+id username
+groups username
+
+
+# -------------------------------
+# 3. Important Files
+# -------------------------------
+
+# User info (NO password)
+cat /etc/passwd
+
+# Password info (encrypted)
+cat /etc/shadow
+
+# Group info
+cat /etc/group
+
+# Group password (rare)
+cat /etc/gshadow
+
+
+# -------------------------------
+# 4. Create User
+# -------------------------------
+
+# Basic:
+useradd username
+
+# With home + shell + group:
+useradd -m -d /home/user -s /bin/bash -g groupname username
+
+
+# -------------------------------
+# 5. Modify User
+# -------------------------------
+
+# Change UID:
+usermod -u 1050 username
+
+# Change primary group:
+usermod -g groupname username
+
+# Add to secondary group:
+usermod -aG groupname username
+
+# Change shell:
+usermod -s /bin/bash username
+
+# Change home directory:
+usermod -d /home/newdir -m username
+
+
+# -------------------------------
+# 6. Delete User
+# -------------------------------
+userdel username
+userdel -r username   # remove home also
+
+
+# -------------------------------
+# 7. Create Group
+# -------------------------------
+groupadd groupname
+
+# With GID:
+groupadd -g 1050 groupname
+
+
+# -------------------------------
+# 8. Modify Group
+# -------------------------------
+groupmod -g 2000 groupname
+
+
+# -------------------------------
+# 9. Password Management
+# -------------------------------
+
+# Set or change password:
+passwd username
+
+# Lock account:
+passwd -l username
+
+# Unlock account:
+passwd -u username
+
+
+# -------------------------------
+# 10. Password Aging
+# -------------------------------
+
+# View password details:
+chage -l username
+
+# Set expiry:
+chage -M 30 username
+
+
+# -------------------------------
+# 11. Switch User
+# -------------------------------
+su - username
+
+# Exit:
+exit
+
+
+# -------------------------------
+# 12. File Ownership
+# -------------------------------
+
+# Change owner:
+chown user file
+
+# Change group:
+chown :group file
+
+# Change both:
+chown user:group file
+
+
+# -------------------------------
+# 13. Permissions
+# -------------------------------
+
+# Numeric:
+chmod 640 file
+
+# Meaning:
+# 6 = rw-
+# 4 = r--
+# 0 = ---
+
+
+# -------------------------------
+# 14. Check Permissions
+# -------------------------------
+
+ls -l file
+
+# Numeric:
+stat -c "%a" file
+
+# Symbolic:
+stat -c "%A" file
+
+
+# -------------------------------
+# 15. ACL (Advanced Permission)
+# -------------------------------
+
+# Give user access:
+setfacl -m u:user:rwx file
+
+# Give group access:
+setfacl -m g:group:r-- file
+
+# Check ACL:
+getfacl file
+
+
+# -------------------------------
+# 16. Sudo Access
+# -------------------------------
+
+# Safe method:
+echo "username ALL=(ALL) ALL" > /etc/sudoers.d/username
+chmod 440 /etc/sudoers.d/username
+
+
+# -------------------------------
+# 17. Useful Commands
+# -------------------------------
+
+whoami        # current user
+who           # logged users
+id            # UID, GID info
+
+# ==================================================
+# END OF FILE
+# ==================================================
