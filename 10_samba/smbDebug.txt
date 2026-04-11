@@ -1,0 +1,70 @@
+# ================= USER CREATION + VALIDATION =================
+echo "========================================================"
+echo "[INFO] Checking Linux user existence..."
+
+if id "$USERNAME" &>/dev/null; then
+    echo "[OK] User already exists"
+else
+    echo "[INFO] Creating Linux user..."
+    echo "COMMAND: useradd $USERNAME"
+    useradd "$USERNAME"
+
+    echo "[INFO] Setting Linux password (required)"
+    passwd "$USERNAME"
+fi
+
+echo "[VERIFY USER]"
+id "$USERNAME"
+
+
+# ================= SAMBA USER ADD (WITH ERROR HANDLING) =================
+echo "========================================================"
+echo "[INFO] Adding Samba user..."
+
+smbpasswd -a "$USERNAME"
+
+if [ $? -ne 0 ]; then
+    echo "[ERROR] Failed to add Samba user!"
+    echo "[FIX] Trying to reset Samba database..."
+
+    rm -f /var/lib/samba/private/passdb.tdb
+    systemctl restart smb
+
+    smbpasswd -a "$USERNAME"
+fi
+
+echo "[VERIFY SAMBA USER]"
+pdbedit -L | grep "$USERNAME"
+
+
+# ================= FORCE SECURE CONFIG =================
+echo "========================================================"
+echo "[INFO] Enforcing secure configuration..."
+
+sed -i "/\[$SHARE_NAME\]/,/^$/ s/guest ok = yes/guest ok = no/" /etc/samba/smb.conf
+echo "valid users = $USERNAME" >> /etc/samba/smb.conf
+
+systemctl restart smb nmb
+
+echo "[VERIFY CONFIG]"
+testparm | grep -E "guest ok|valid users"
+
+
+# ================= FINAL SUCCESS CHECK =================
+echo "========================================================"
+echo "[FINAL CHECK] Testing access locally..."
+
+smbclient //$HOSTNAME/$SHARE_NAME -U $USERNAME <<EOF
+ls
+exit
+EOF
+
+if [ $? -eq 0 ]; then
+    echo "========================================================"
+    echo "ACCESS GRANTED — SAMBA WORKING PERFECTLY"
+    echo "========================================================"
+else
+    echo "========================================================"
+    echo "ACCESS FAILED — CHECK CONFIG / PASSWORD"
+    echo "========================================================"
+fi

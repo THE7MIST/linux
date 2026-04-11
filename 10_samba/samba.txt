@@ -1,0 +1,192 @@
+#!/bin/bash
+
+############################################################
+#SAMBA COMPLETE LAB (SERVER + CLIENT + TROUBLESHOOTING)
+# Covers: Anonymous Share + Secure Share + Mount + Access
+############################################################
+
+
+##############################
+#PART 1: SERVER SETUP
+##############################
+
+# Install Samba
+dnf install samba samba-common samba-client -y
+
+# Create shared directory
+mkdir /admin
+touch /admin/file{1..10}.txt
+
+# Set permissions for anonymous access
+chmod -R 755 /admin
+chown -R nobody:nobody /admin
+
+# Backup config
+cp /etc/samba/smb.conf /etc/samba/smb.conf.bak
+
+# Configure Samba (Anonymous Share)
+cat <<EOF >> /etc/samba/smb.conf
+
+[admin]
+path = /admin
+browsable = yes
+writable = yes
+guest ok = yes
+read only = no
+
+EOF
+
+# Check config
+testparm
+
+# Start & Enable services
+systemctl start smb nmb
+systemctl enable smb nmb
+
+# Firewall configuration
+firewall-cmd --permanent --add-service=samba
+firewall-cmd --reload
+
+# SELinux (temporary disable for exam)
+setenforce 0
+
+# Verify services
+systemctl status smb nmb
+
+
+##############################
+#PART 2: CLIENT (ANONYMOUS TEST)
+##############################
+
+# Install client tools
+dnf install samba-client -y   # (Use apt install samba-client -y for Debian)
+
+# Access share (replace IP)
+smbclient '//192.168.X.X/admin'
+
+# Inside smb:
+# ls
+# exit
+
+
+##############################
+#PART 3: SECURE SAMBA SETUP (SERVER)
+##############################
+
+# Create group and user
+groupadd smb_group
+useradd -G smb_group smbuser
+
+# Set Samba password
+smbpasswd -a smbuser
+
+# Secure permissions
+chmod -R 770 /admin
+chown -R root:smb_group /admin
+
+# Modify Samba config (SECURE SHARE)
+cat <<EOF > /etc/samba/smb.conf
+
+[global]
+workgroup = WORKGROUP
+
+[admin]
+path = /admin
+valid users = @smb_group
+guest ok = no
+writable = no
+browsable = yes
+
+EOF
+
+# Restart services
+systemctl restart smb nmb
+
+
+##############################
+#PART 4: CLIENT (SECURE ACCESS)
+##############################
+
+# Access with user authentication
+smbclient '//192.168.X.X/admin' -U smbuser
+
+# Inside smb:
+# get file1.txt
+# put localfile.txt
+# recurse ON
+# prompt OFF
+# mput *.pdf
+# exit
+
+
+##############################
+#PART 5: PERMANENT MOUNT (CLIENT)
+##############################
+
+# Install CIFS utils
+dnf install cifs-utils -y
+
+# Create mount point
+mkdir -p /mnt/smbshare
+
+# Mount manually (test)
+mount -t cifs //192.168.X.X/admin /mnt/smbshare -o username=smbuser,password=PASSWORD
+
+# Permanent mount
+cat <<EOF >> /etc/fstab
+
+//192.168.X.X/admin /mnt/smbshare cifs defaults,username=smbuser,password=PASSWORD 0 0
+
+EOF
+
+# Reload and mount
+systemctl daemon-reexec
+mount -a
+
+
+##############################
+#PART 6: WINDOWS ACCESS
+##############################
+
+# On Windows:
+# WIN + R
+# \\192.168.X.X\admin
+# Username: smbuser
+# Password: ******
+
+
+##############################
+#PART 7: TROUBLESHOOTING
+##############################
+
+# 1. Check config
+testparm
+
+# 2. Check services
+systemctl status smb nmb
+
+# 3. Restart services
+systemctl restart smb nmb
+
+# 4. Check firewall
+firewall-cmd --list-all
+
+# 5. Open ports manually (if needed)
+firewall-cmd --permanent --add-port=139/tcp
+firewall-cmd --permanent --add-port=445/tcp
+firewall-cmd --reload
+
+# 6. SELinux issues
+setenforce 0
+
+# 7. Permissions issue
+ls -ld /admin
+
+# 8. Logs
+journalctl -xe
+tail -f /var/log/samba/log.smbd
+
+
+############################################################
+# END OF LAB
+############################################################

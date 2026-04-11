@@ -1,0 +1,133 @@
+# =========================================================
+# NFS COMPLETE SETUP (SERVER + CLIENT + VERIFICATION)
+# =========================================================
+
+
+# =========================================================
+# SERVER CONFIGURATION (192.168.220.130)
+# =========================================================
+
+# 1) Install NFS
+dnf install -y nfs-utils
+
+# 2) Create shared directory
+mkdir -p /data
+
+# 3) Create file
+touch /data/secret
+
+# 4) Set permissions
+chmod -R 755 /data
+
+# 5) Configure exports
+vim /etc/exports
+
+# Add:
+# /data   192.168.220.0/24(rw,sync,no_root_squash)
+
+# Apply export config
+exportfs -rav
+
+# 6) Start and enable services
+systemctl enable --now rpcbind
+systemctl enable --now nfs-server
+
+# Verify service
+systemctl status nfs-server
+
+# 7) Configure firewall
+firewall-cmd --add-service=nfs --permanent
+firewall-cmd --reload
+
+# Verify export
+showmount -e 192.168.220.130
+
+
+
+# =========================================================
+#  CLIENT CONFIGURATION
+# =========================================================
+
+# 1) Install NFS client
+dnf install -y nfs-utils
+
+# 2) Create mount point
+mkdir -p /mnt
+
+# 3) Temporary mount
+mount -t nfs 192.168.220.130:/data /mnt
+
+# 4) Verify mount
+df -h
+mount | grep nfs
+
+# 5) Unmount
+umount /mnt
+
+# 6) Permanent mount
+vim /etc/fstab
+
+# Add:
+# 192.168.220.130:/data   /mnt   nfs   defaults   0 0
+
+# 7) Apply fstab
+mount -a
+
+# Verify again
+df -h
+
+
+
+# =========================================================
+#  VERIFICATION TASKS
+# =========================================================
+
+# 1) Confirm mount
+df -h | grep /mnt
+
+# 2) Access file
+ls /mnt
+cat /mnt/secret
+
+# 3) Root access test (no_root_squash)
+touch /mnt/root_test
+chown root:root /mnt/root_test
+ls -l /mnt
+
+# Expected:
+# root_test owned by root → confirms no_root_squash
+
+# 4) Disk usage
+df -h /mnt
+du -sh /mnt
+
+
+
+# =========================================================
+# 🔧 TROUBLESHOOTING (EXAM QUICK FIX)
+# =========================================================
+
+# Check server export
+showmount -e 192.168.220.130
+
+# Restart services
+systemctl restart nfs-server
+systemctl restart rpcbind
+
+# Re-export
+exportfs -rav
+
+# Firewall check
+firewall-cmd --list-all
+
+# Check mount errors
+mount -a
+
+# Check network
+ping 192.168.220.130
+
+
+
+# "NFS allows sharing directories over network.
+# Server exports using /etc/exports, client mounts using mount or fstab,
+# and verification is done using df, ls, and permission testing."

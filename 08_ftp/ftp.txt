@@ -1,0 +1,270 @@
+###############################
+# VSFTPD COMPLETE LAB GUIDE
+# Covers Q1–Q10 (Server + Client)
+# Each command includes:
+# WHY -> purpose
+# WHEN -> when to use
+# HOW -> what it does
+###############################
+
+
+###############################
+# -------- SERVER SIDE --------
+###############################
+
+echo "Q1: INSTALL FTP SERVER"
+
+# Install vsftpd package
+# WHY: Provides FTP service daemon
+# WHEN: First step before configuration
+dnf install vsftpd -y
+
+# Check service status
+# WHY: Verify service state
+systemctl status vsftpd
+
+# Start service
+# WHY: Activate FTP server immediately
+systemctl start vsftpd
+
+# Enable at boot
+# WHY: Auto start after reboot
+systemctl enable vsftpd
+
+# Restart service
+# WHY: Apply config changes
+systemctl restart vsftpd
+
+# Verify again
+systemctl status vsftpd
+
+
+echo "VERIFY PORT"
+
+# Check if FTP is listening on port 21
+# WHY: Confirms server is accepting connections
+lsof -i:21
+
+
+
+echo "Q2: FIREWALL CONFIGURATION"
+
+# Check available services
+# WHY: Confirm FTP service exists
+firewall-cmd --get-services | grep ftp
+
+# Allow FTP permanently
+# WHY: Allow external clients to connect
+firewall-cmd --add-service=ftp --permanent
+
+# Reload firewall
+# WHY: Apply rules
+firewall-cmd --reload
+
+# Verify firewall rules
+firewall-cmd --list-all
+
+
+
+echo "Q3: ANONYMOUS FTP SETUP"
+
+# Check config file
+# WHY: Verify settings
+cat /etc/vsftpd/vsftpd.conf
+
+# Enable anonymous login
+# WHY: Allow users without account
+# HOW: Edit file manually
+# anonymous_enable=YES
+
+# Create public file
+# WHY: Test anonymous access
+touch /var/ftp/pub/public.txt
+
+# Restart service
+systemctl restart vsftpd
+
+
+
+echo "Q4: LOCAL USER AUTHENTICATION"
+
+# Create user
+# WHY: Allow login with credentials
+useradd ftpUser
+
+# Set password
+passwd ftpUser
+
+# Enable local login in config
+# local_enable=YES
+
+# Restart service
+systemctl restart vsftpd
+
+
+
+echo "Q6: CHROOT (RESTRICT USER)"
+
+# WHY: Prevent user from accessing system directories
+# Add in config:
+# chroot_local_user=YES
+
+systemctl restart vsftpd
+
+
+
+echo "Q7: DISABLE ANONYMOUS"
+
+# WHY: Increase security
+# Set:
+# anonymous_enable=NO
+
+systemctl restart vsftpd
+
+
+
+echo "Q8: CUSTOM UPLOAD DIRECTORY"
+
+# Create directory
+# WHY: Allow controlled uploads
+mkdir /ftp
+
+# Set permissions
+# WHY: Allow writing
+chmod 777 /ftp
+
+# Enable uploads in config:
+# write_enable=YES
+
+systemctl restart vsftpd
+
+
+
+echo "Q9: TROUBLESHOOTING"
+
+# Check service
+systemctl status vsftpd
+
+# Check port
+lsof -i:21
+
+# Check firewall
+firewall-cmd --list-all
+
+# Restart if needed
+systemctl restart vsftpd
+
+
+
+###############################
+# -------- CLIENT SIDE --------
+###############################
+
+echo "INSTALL FTP CLIENT"
+
+# Install FTP client
+# WHY: Required to connect to server
+dnf install ftp -y
+
+
+
+echo "CONNECT TO SERVER"
+
+# Connect to FTP server
+# WHY: Start FTP session
+ftp <server-ip>
+
+# Enter username (ftpUser or anonymous)
+# Enter password
+
+
+echo "Q5: FILE OPERATIONS"
+
+# Show files
+# WHY: List server directory
+ls
+
+# Print working directory
+# WHY: Know current location
+pwd
+
+# Change server directory
+# WHY: Navigate server
+cd /path
+
+# Change local directory
+# WHY: Navigate client system
+lcd /path
+
+
+echo "DOWNLOAD FILE"
+
+# Download file from server
+# WHY: Copy server file to client
+get filename
+
+
+echo "UPLOAD FILE"
+
+# Upload file to server
+# WHY: Send file from client
+put filename
+
+
+echo "MULTIPLE DOWNLOAD"
+
+# Disable prompt
+# WHY: Avoid confirmation for each file
+prompt off
+
+# Download all files
+mget *
+
+
+echo "MULTIPLE UPLOAD"
+
+# Upload multiple files
+mput *
+
+
+echo "COMMON ERRORS"
+
+# 550 Failed to open file
+# WHY: File does not exist OR permission issue
+
+# local: No such file
+# WHY: File not present in client directory
+
+# Passive mode refused
+# WHY: Firewall or network issue
+
+
+echo "EXIT"
+
+# Close FTP session
+bye
+
+
+
+###############################
+# Q10 FINAL VALIDATION
+###############################
+
+# SERVER:
+# Service running
+systemctl status vsftpd
+
+# Port open
+lsof -i:21
+
+# Firewall allowed
+firewall-cmd --list-all
+
+# CLIENT:
+# Login works
+# Upload works
+# Download works
+
+###############################
+# END OF LAB
+###############################
