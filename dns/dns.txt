@@ -1,0 +1,173 @@
+###############################
+# DNS SERVER COMPLETE SETUP
+# Using BIND (named)
+###############################
+
+###############################
+# 1. INSTALL DNS PACKAGES
+###############################
+# Install BIND DNS server and utilities
+dnf install -y bind bind-utils
+
+
+###############################
+# 2. NETWORK CONFIGURATION
+###############################
+# Configure static IP (use nmtui GUI)
+nmtui
+
+# Verify IP configuration
+ip a
+
+# Check DNS resolver config
+cat /etc/resolv.conf
+
+
+###############################
+# 3. MAIN DNS CONFIGURATION FILE
+###############################
+# Edit main config
+vim /etc/named.conf
+
+# Key configurations:
+# - Listen on server IP
+# - Allow queries from any
+# - Define forward & reverse zones
+
+# ---- IMPORTANT CONFIG ----
+options {
+    listen-on port 53 { 192.168.220.130; };   # DNS server IP
+    directory "/var/named";                   # Zone files location
+    allow-query { any; };                     # Allow all clients
+    recursion yes;                            # Enable recursion (lab setup)
+};
+
+# ---- FORWARD ZONE ----
+zone "ditiss.com" IN {
+    type master;
+    file "frwd.ditiss.com";
+};
+
+# ---- REVERSE ZONE ----
+zone "220.168.192.in-addr.arpa" IN {
+    type master;
+    file "rvs.ditiss.com";
+};
+
+
+###############################
+# 4. CREATE ZONE FILES
+###############################
+cd /var/named
+
+
+###############################
+# 4A. FORWARD ZONE FILE
+###############################
+vim frwd.ditiss.com
+
+# Content:
+$TTL 1D
+@   IN SOA  server200.ditiss.com. abc.gmail.com. (
+        1       ; serial (increment on change)
+        1D      ; refresh
+        1H      ; retry
+        1W      ; expire
+        3H )    ; minimum
+
+@       IN NS   server200.ditiss.com.
+
+# A Records (Domain → IP)
+ditiss.com.    IN A    192.168.220.130
+www            IN A    192.168.220.130
+server200      IN A    192.168.220.130
+
+
+###############################
+# 4B. REVERSE ZONE FILE
+###############################
+vim rvs.ditiss.com
+
+# Content:
+$TTL 1D
+@   IN SOA server200.ditiss.com. abc.gmail.com. (
+        2       ; serial (must increment)
+        1D
+        1H
+        1W
+        3H )
+
+@   IN NS server200.ditiss.com.
+
+# PTR Record (IP → Domain)
+130 IN PTR server200.ditiss.com.
+
+
+###############################
+# 5. PERMISSIONS (CRITICAL)
+###############################
+# Set correct ownership for BIND
+chown root:named frwd.ditiss.com rvs.ditiss.com
+
+# Set secure permissions
+chmod 640 frwd.ditiss.com rvs.ditiss.com
+
+
+###############################
+# 6. ENABLE & START DNS SERVICE
+###############################
+systemctl enable named
+systemctl restart named
+
+# Check status
+systemctl status named
+
+
+###############################
+# 7. FIREWALL CONFIGURATION
+###############################
+# Allow DNS service (port 53)
+firewall-cmd --add-service=dns --permanent
+firewall-cmd --reload
+
+
+###############################
+# 8. VERIFICATION
+###############################
+
+# Forward Lookup (Domain → IP)
+host ditiss.com
+host server200.ditiss.com
+host www.ditiss.com
+
+# Reverse Lookup (IP → Domain)
+host 192.168.220.130
+
+# Force record types
+host -t A server200.ditiss.com
+host -t PTR 192.168.220.130
+
+
+###############################
+# 9. DEBUGGING (IF REQUIRED)
+###############################
+
+# Check config syntax
+named-checkconf
+
+# Check zone files
+named-checkzone ditiss.com /var/named/frwd.ditiss.com
+named-checkzone 220.168.192.in-addr.arpa /var/named/rvs.ditiss.com
+
+# Logs
+journalctl -xeu named
+
+
+###############################
+# FINAL RESULT
+###############################
+# Forward DNS → Working
+# Reverse DNS → Working
+# Service → Active
+# Permissions → Correct
+###############################

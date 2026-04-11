@@ -1,0 +1,94 @@
+# -------- Apache Installation --------
+
+dnf install -y httpd
+
+# -------- Start and Enable Apache --------
+
+systemctl start httpd
+systemctl enable httpd
+systemctl status httpd --no-pager
+
+# -------- Configure Firewall --------
+
+firewall-cmd --add-service=http --permanent
+firewall-cmd --add-service=https --permanent
+firewall-cmd --reload
+
+# -------- Verify Firewall --------
+
+firewall-cmd --list-all
+
+# -------- Create User for Isolated Hosting --------
+
+useradd ditiss
+
+# -------- Create Directory Structure --------
+
+mkdir -p /home/ditiss/public_html
+
+# -------- Set Permissions --------
+
+chmod 711 /home/ditiss
+chmod 755 /home/ditiss/public_html
+
+# -------- Create Web Page --------
+
+echo "<html><body><h1>Ditiss Dedicated Isolated Site</h1></body></html>" > /home/ditiss/public_html/index.html
+
+# -------- Set Ownership --------
+
+chown -R ditiss:ditiss /home/ditiss
+
+# -------- Set File Permission --------
+
+chmod 644 /home/ditiss/public_html/index.html
+
+# -------- Enable UserDir --------
+
+sed -i 's/^UserDir.*/UserDir public_html/' /etc/httpd/conf.d/userdir.conf
+
+# -------- Configure VirtualHost (Isolated Dedicated) --------
+
+mkdir -p /etc/httpd/sites-available
+mkdir -p /etc/httpd/sites-enabled
+
+echo "IncludeOptional sites-enabled/*.conf" >> /etc/httpd/conf/httpd.conf
+
+# -------- Create VirtualHost File --------
+
+cat <<EOF > /etc/httpd/sites-available/ditiss.conf
+<VirtualHost *:80>
+ServerName ditiss.com
+ServerAlias [www.ditiss.com](http://www.ditiss.com)
+DocumentRoot /home/ditiss/public_html </VirtualHost>
+EOF
+
+# -------- Enable Site --------
+
+ln -s /etc/httpd/sites-available/ditiss.conf /etc/httpd/sites-enabled/
+
+# -------- SELinux Fix --------
+
+setenforce 0
+chcon -R -t httpd_sys_content_t /home/ditiss/public_html
+
+# -------- Restart Apache --------
+
+systemctl restart httpd
+
+# -------- Verify Configuration --------
+
+httpd -S
+
+# -------- Test Website --------
+
+curl http://ditiss.com
+curl http://$(hostname -I | awk '{print $1}')
+
+# -------- Show Important Paths --------
+
+echo "Config File: /etc/httpd/conf/httpd.conf"
+echo "VirtualHost File: /etc/httpd/sites-available/ditiss.conf"
+echo "DocumentRoot: /home/ditiss/public_html"
+echo "Index File: /home/ditiss/public_html/index.html"
+echo "Logs: /var/log/httpd"

@@ -1,0 +1,124 @@
+# =============================== 
+# SSH SERVER CONFIGURATION LAB 
+# =============================== 
+# ------------------------------- 
+# QUESTION: 
+# Configure SSH server with: 
+# - Install & enable SSH 
+# - Allow password authentication 
+# - Allow root login 
+# - Create user admin1 
+# - Verify login (user + root) 
+# ------------------------------- 
+# =============================== 
+# STEP 1: SEARCH PACKAGE 
+# =============================== 
+echo "Search SSH related packages" 
+dnf search ssh 
+# Used to find available SSH packages 
+# =============================== 
+# STEP 2: IDENTIFY PACKAGE NAME 
+# =============================== 
+echo "Identify package providing sshd service" 
+dnf provides */sshd 
+# Maps service (sshd) → package (openssh-server) 
+# =============================== 
+# STEP 3: CHECK IF INSTALLED 
+# =============================== 
+echo "Check if openssh-server is installed" 
+rpm -q openssh-server 
+# rpm -q = query installed package 
+# =============================== 
+# STEP 4: INSTALL PACKAGE 
+# =============================== 
+echo "Install SSH server package" 
+dnf install openssh-server -y 
+# -y = auto confirm 
+# =============================== 
+# STEP 5: VERIFY INSTALLED FILES 
+# =============================== 
+echo "List all files installed by package" 
+rpm -ql openssh-server 
+# -ql = query list all files 
+echo "List config files" 
+rpm -qc openssh-server 
+# -qc = query config files 
+# =============================== 
+# STEP 6: CHECK SERVICE STATUS 
+# =============================== 
+echo "Check SSH service status" 
+systemctl status sshd 
+# Shows running/inactive state 
+echo "Check if service enabled on boot" 
+systemctl is-enabled sshd 
+# =============================== 
+# STEP 7: START & ENABLE SERVICE 
+# =============================== 
+echo "Start SSH service" 
+systemctl start sshd 
+echo "Enable SSH service at boot" 
+systemctl enable sshd 
+# =============================== 
+# STEP 8: FIND SYSTEM IP 
+# =============================== 
+echo "Check IP address" 
+ip a 
+# Needed for SSH connection 
+# =============================== 
+# STEP 9: EDIT SSH CONFIGURATION 
+# =============================== 
+echo "Edit SSH config file" 
+vim /etc/ssh/sshd_config 
+# Make following changes inside file: 
+# ---------------------------------- 
+# PasswordAuthentication yes 
+# PermitRootLogin yes 
+# ---------------------------------- 
+# Save and exit (:wq) 
+# =============================== 
+# STEP 10: VALIDATE CONFIG 
+# =============================== 
+echo "Check SSH config syntax" 
+sshd -t 
+# Prevents errors before restart 
+# =============================== 
+# STEP 11: RESTART SERVICE 
+# =============================== 
+echo "Restart SSH service" 
+systemctl restart sshd 
+# =============================== 
+# STEP 12: CREATE USER 
+# =============================== 
+echo "Create user admin1" 
+useradd admin1 
+echo "Set password" 
+passwd admin1 
+# Enter: Admin@123 
+# =============================== 
+# STEP 13: VERIFY SSH LOGIN 
+# =============================== 
+echo "Login as normal user" 
+ssh admin1@<server-ip> 
+echo "Login as root user" 
+ssh root@<server-ip> 
+# =============================== 
+# STEP 14: EXTRA VERIFICATION 
+# =============================== 
+echo "Check which package owns sshd" 
+rpm -qf $(which sshd) 
+echo "View service file" 
+systemctl cat sshd 
+# =============================== 
+# NOTES / CONCEPTS 
+# =============================== 
+# rpm = low-level package manager 
+# dnf = high-level package manager 
+# sshd = SSH daemon (server) 
+# ssh = client command 
+# Config file location: 
+# /etc/ssh/sshd_config 
+# Service file location: 
+# /usr/lib/systemd/system/sshd.service 
+# =============================== 
+# END OF LAB 
+# =============================== 

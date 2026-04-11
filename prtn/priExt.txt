@@ -1,0 +1,184 @@
+###############################
+
+# DISK PARTITIONING COMPLETE FLOW
+
+###############################
+
+############################################################
+
+# PART 1: BASIC PARTITION (PRIMARY) + MOUNT
+
+############################################################
+
+###############################
+
+# STEP 1: VERIFY DISK
+
+###############################
+lsblk
+
+###############################
+
+# STEP 2: CREATE PARTITION (2GB)
+
+###############################
+fdisk /dev/sda
+
+# n → p → 1 → Enter → +2G
+
+# w
+
+# Apply changes
+
+partprobe
+
+###############################
+
+# STEP 3: FORMAT FILESYSTEM
+
+###############################
+mkfs.xfs /dev/sda1
+
+###############################
+
+# STEP 4: MOUNT (TEMPORARY)
+
+###############################
+mkdir -p /data1
+mount /dev/sda1 /data1
+
+# Verify
+
+df -h
+
+###############################
+
+# STEP 5: PERMANENT MOUNT
+
+###############################
+blkid
+
+vi /etc/fstab
+
+# Example:
+
+# UUID=xxxx   /data1   xfs   defaults   0 0
+
+mount -a
+
+###############################
+
+# STEP 6: CLEANUP
+
+###############################
+umount /data1
+
+# Remove fstab entry manually
+
+vi /etc/fstab
+
+fdisk /dev/sda
+
+# d → 1 → w
+
+partprobe
+lsblk
+
+############################################################
+
+# PART 2: EXTENDED + LOGICAL PARTITIONS
+
+############################################################
+
+###############################
+
+# STEP 1: VERIFY DISK
+
+###############################
+lsblk
+
+###############################
+
+# STEP 2: CREATE EXTENDED + LOGICAL
+
+###############################
+fdisk /dev/sdb
+
+# n → e → 1 → Enter → Enter     (extended partition)
+
+# n → Enter → +2G              (/dev/sdb5)
+
+# n → Enter → +1G              (/dev/sdb6)
+
+# n → Enter → Enter            (/dev/sdb7)
+
+# p (verify)
+
+# w
+
+# Apply changes
+
+partprobe
+
+# Verify
+
+lsblk
+
+###############################
+
+# STEP 3: FORMAT FILESYSTEMS
+
+###############################
+mkfs.xfs  /dev/sdb5
+mkfs.ext4 /dev/sdb6
+mkfs.ext3 /dev/sdb7
+
+# Verify
+
+lsblk -f
+
+###############################
+
+# STEP 4: MOUNT (TEMPORARY)
+
+###############################
+mkdir -p /data1 /data2 /backup
+
+mount /dev/sdb5 /data1
+mount /dev/sdb6 /data2
+
+# Verify
+
+df -h
+lsblk
+
+###############################
+
+# STEP 5: PERMANENT MOUNT
+
+###############################
+blkid
+
+vi /etc/fstab
+
+# Example:
+
+# UUID=xxxx   /backup   ext3   defaults   0 0
+
+systemctl daemon-reexec
+mount -a
+
+###############################
+
+# STEP 6: FINAL VERIFICATION
+
+###############################
+df -h
+lsblk -f
+mount
+
+###############################
+
+# END OF DISK PARTITION FLOW
+
+###############################

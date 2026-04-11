@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# Script Name: 01_Apache_Dedicated_Full
+
+# Purpose: Complete setup for Apache Dedicated Hosting (single site)
+
+echo "-------- Step 1: Installing Apache --------"
+dnf install -y httpd
+
+echo "-------- Step 2: Starting and Enabling Service --------"
+systemctl start httpd
+systemctl enable httpd
+systemctl status httpd --no-pager
+
+echo "-------- Step 3: Configuring Firewall --------"
+firewall-cmd --add-service=http --permanent
+firewall-cmd --add-service=https --permanent
+firewall-cmd --reload
+
+echo "-------- Firewall Status --------"
+firewall-cmd --list-all
+
+echo "-------- Step 4: Checking Port 80 --------"
+lsof -i :80
+
+echo "-------- Step 5: Creating Default Web Page --------"
+echo "<html><body><h1>Dedicated Apache Server</h1></body></html>" > /var/www/html/index.html
+
+echo "-------- Verifying Web Page Content --------"
+cat /var/www/html/index.html
+
+echo "-------- Step 6: Handling SELinux --------"
+setenforce 0
+
+echo "SELinux Status:"
+getenforce
+
+echo "-------- Step 7: Apache Configuration File --------"
+echo "Finding main config file"
+httpd -V | grep SERVER_CONFIG_FILE
+
+echo "-------- Step 8: DocumentRoot Verification --------"
+grep -i DocumentRoot /etc/httpd/conf/httpd.conf
+
+echo "-------- Important Paths --------"
+echo "Config directory: /etc/httpd/"
+echo "Main config file: /etc/httpd/conf/httpd.conf"
+echo "DocumentRoot: /var/www/html"
+echo "Logs directory: /var/log/httpd"
+
+echo "-------- Step 9: Restart Apache --------"
+systemctl restart httpd
+
+echo "-------- Step 10: Verification --------"
+echo "Testing locally"
+curl http://localhost
+
+echo "-------- Optional External Test --------"
+echo "Use browser or curl:"
+echo "http://<server-ip>"
+
+echo "-------- Completed: Dedicated Hosting Setup Successful --------"

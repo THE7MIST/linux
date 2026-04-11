@@ -1,0 +1,114 @@
+# -------- Apache Installation --------
+
+dnf install -y httpd
+
+# -------- Start and Enable Apache --------
+
+systemctl start httpd
+systemctl enable httpd
+systemctl status httpd --no-pager
+
+# -------- Configure Firewall --------
+
+firewall-cmd --add-service=http --permanent
+firewall-cmd --add-service=https --permanent
+firewall-cmd --reload
+
+# -------- Verify Firewall --------
+
+firewall-cmd --list-all
+
+# -------- Create Users --------
+
+useradd ditiss
+useradd bts
+
+# -------- Create Directory Structure --------
+
+mkdir -p /home/ditiss/public_html
+mkdir -p /home/bts/public_html
+
+# -------- Set Permissions --------
+
+chmod 711 /home/ditiss
+chmod 711 /home/bts
+
+chmod 755 /home/ditiss/public_html
+chmod 755 /home/bts/public_html
+
+# -------- Create Web Pages --------
+
+echo "Ditiss Dedicated Site" > /home/ditiss/public_html/index.html
+echo "BTS Shared Site" > /home/bts/public_html/index.html
+
+# -------- Set Ownership --------
+
+chown -R ditiss:ditiss /home/ditiss
+chown -R bts:bts /home/bts
+
+# -------- Set File Permissions --------
+
+chmod 644 /home/ditiss/public_html/index.html
+chmod 644 /home/bts/public_html/index.html
+
+# -------- Enable Virtual Host Structure --------
+
+mkdir -p /etc/httpd/sites-available
+mkdir -p /etc/httpd/sites-enabled
+
+echo "IncludeOptional sites-enabled/*.conf" >> /etc/httpd/conf/httpd.conf
+
+# -------- Create VirtualHost for ditiss.com --------
+
+cat <<EOF > /etc/httpd/sites-available/ditiss.conf
+<VirtualHost *:80>
+ServerName ditiss.com
+ServerAlias [www.ditiss.com](http://www.ditiss.com)
+DocumentRoot /home/ditiss/public_html </VirtualHost>
+EOF
+
+# -------- Create VirtualHost for bts.army --------
+
+cat <<EOF > /etc/httpd/sites-available/bts.conf
+<VirtualHost *:80>
+ServerName bts.army
+ServerAlias [www.bts.army](http://www.bts.army)
+DocumentRoot /home/bts/public_html </VirtualHost>
+EOF
+
+# -------- Enable Sites --------
+
+ln -s /etc/httpd/sites-available/ditiss.conf /etc/httpd/sites-enabled/00-ditiss.conf
+ln -s /etc/httpd/sites-available/bts.conf /etc/httpd/sites-enabled/01-bts.conf
+
+# -------- Enable UserDir --------
+
+sed -i 's/^UserDir.*/UserDir public_html/' /etc/httpd/conf.d/userdir.conf
+
+# -------- SELinux Fix --------
+
+setenforce 0
+chcon -R -t httpd_sys_content_t /home/ditiss/public_html
+chcon -R -t httpd_sys_content_t /home/bts/public_html
+
+# -------- Restart Apache --------
+
+systemctl restart httpd
+
+# -------- Verify VirtualHost --------
+
+httpd -S
+
+# -------- Test Websites --------
+
+curl http://ditiss.com
+curl http://bts.army
+
+# -------- Show Important Paths --------
+
+echo "Config File: /etc/httpd/conf/httpd.conf"
+echo "Sites Available: /etc/httpd/sites-available/"
+echo "Sites Enabled: /etc/httpd/sites-enabled/"
+echo "Ditiss Root: /home/ditiss/public_html"
+echo "BTS Root: /home/bts/public_html"
+echo "Logs: /var/log/httpd"

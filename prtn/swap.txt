@@ -1,0 +1,151 @@
+###############################
+
+# SWAP MANAGEMENT COMPLETE FLOW
+
+###############################
+
+###############################
+
+# STEP 1: VERIFY DISK
+
+###############################
+
+# Check available disks and partitions
+
+lsblk
+
+###############################
+
+# STEP 2: CREATE SWAP PARTITION
+
+###############################
+
+# Create 2GB swap partition on /dev/sdb
+
+fdisk /dev/sdb
+
+# n → p → 1 → Enter → +2G
+
+# t → 82 (Linux swap type)
+
+# w (save)
+
+# Reload partition table
+
+partprobe
+
+# Verify
+
+lsblk
+
+###############################
+
+# STEP 3: INITIALIZE & ACTIVATE SWAP
+
+###############################
+
+# Format partition as swap
+
+mkswap /dev/sdb1
+
+# Enable swap
+
+swapon /dev/sdb1
+
+# Verify
+
+swapon --show
+free -h
+
+###############################
+
+# STEP 4: PERMANENT CONFIGURATION
+
+###############################
+
+# Get UUID
+
+blkid
+
+# Edit fstab
+
+vi /etc/fstab
+
+# Example entry:
+
+# UUID=xxxx-xxxx   none   swap   defaults   0 0
+
+# Apply without reboot
+
+systemctl daemon-reexec
+swapon -a
+
+# Verify
+
+swapon --show
+free -h
+cat /proc/swaps
+
+###############################
+
+# STEP 5: OPTIONAL (ADVANCED)
+
+###############################
+
+# Set swap priority (higher = preferred)
+
+swapon -p 10 /dev/sdb1
+
+# Create swap file (1GB)
+
+fallocate -l 1G /swapfile
+chmod 600 /swapfile
+
+# Format and enable
+
+mkswap /swapfile
+swapon /swapfile
+
+# Verify both swap spaces
+
+swapon --show
+free -h
+
+###############################
+
+# STEP 6: CLEANUP (NO REBOOT)
+
+###############################
+
+# Disable swap partition
+
+swapoff /dev/sdb1
+
+# Remove entry from fstab
+
+vi /etc/fstab
+
+# Disable and remove swap file
+
+swapoff /swapfile
+rm -f /swapfile
+
+# Delete partition
+
+fdisk /dev/sdb
+
+# d → 1 → w
+
+# Reload partition table
+
+partprobe
+
+# Final verification
+
+lsblk
+
+###############################
+
+# END OF SWAP FLOW
+
+###############################

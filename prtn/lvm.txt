@@ -1,0 +1,265 @@
+###############################
+
+# LVM COMPLETE PRACTICAL FLOW
+
+###############################
+
+###############################
+
+# STEP 1: CREATE PARTITIONS
+
+###############################
+
+# Create 3 partitions on /dev/sdb
+
+# Example:
+
+# /dev/sdb1 → 4GB
+
+# /dev/sdb2 → 4GB
+
+# /dev/sdb3 → 2GB
+
+fdisk /dev/sdb
+
+# n → p → 1 → Enter → +4G
+
+# n → p → 2 → Enter → +4G
+
+# n → p → 3 → Enter → +2G
+
+# t → 1 → 8e (LVM type)
+
+# t → 2 → 8e
+
+# t → 3 → 8e
+
+# w (save)
+
+# Reload partition table
+
+partprobe
+
+# Verify partitions
+
+lsblk
+
+###############################
+
+# STEP 2: CREATE PHYSICAL VOLUMES (PV)
+
+###############################
+
+# Convert partitions into PV
+
+pvcreate /dev/sdb1 /dev/sdb2 /dev/sdb3
+
+# Verify
+
+pvs
+pvdisplay
+
+###############################
+
+# STEP 3: CREATE VOLUME GROUPS (VG)
+
+###############################
+
+# Combine PVs into VG
+
+# VG with default PE size
+
+vgcreate vgdata /dev/sdb1 /dev/sdb2
+
+# VG with custom PE size (16MB)
+
+vgcreate -s 16M vgcustom /dev/sdb3
+
+# Verify
+
+vgs
+vgdisplay
+
+###############################
+
+# STEP 4: CREATE LOGICAL VOLUMES (LV)
+
+###############################
+
+# Create storage units from VG
+
+# Fixed size LV
+
+lvcreate -L 2G -n lvsize vgdata
+
+# LV using 50% free space
+
+lvcreate -l 50%FREE -n lvext vgdata
+
+# LV using all free space
+
+lvcreate -l 100%FREE -n lvnext vgcustom
+
+# Verify
+
+lvs
+lvdisplay
+
+###############################
+
+# STEP 5: FORMAT FILESYSTEM
+
+###############################
+
+# Format all LVs with XFS
+
+mkfs.xfs /dev/vgdata/lvsize
+mkfs.xfs /dev/vgdata/lvext
+mkfs.xfs /dev/vgcustom/lvnext
+
+###############################
+
+# STEP 6: TEMPORARY MOUNT
+
+###############################
+
+# Create mount points
+
+mkdir -p /mnt/data1 /mnt/data2 /mnt/backup
+
+# Mount LVs
+
+mount /dev/vgdata/lvsize /mnt/data1
+mount /dev/vgdata/lvext /mnt/data2
+mount /dev/vgcustom/lvnext /mnt/backup
+
+# Verify
+
+df -h
+
+###############################
+
+# STEP 7: PERMANENT MOUNT
+
+###############################
+
+# Get UUID
+
+blkid
+
+# Edit fstab
+
+vi /etc/fstab
+
+# Example entry:
+
+# UUID=xxxx-xxxx   /mnt/data1   xfs   defaults   0 0
+
+# UUID=yyyy-yyyy   /mnt/data2   xfs   defaults   0 0
+
+# UUID=zzzz-zzzz   /mnt/backup  xfs   defaults   0 0
+
+# Apply changes
+
+systemctl daemon-reexec
+mount -a
+
+###############################
+
+# STEP 8: VERIFICATION
+
+###############################
+pvs
+vgs
+lvs
+lsblk -f
+df -h
+
+###############################
+
+# STEP 9: EXTEND LOGICAL VOLUME
+
+###############################
+
+# Increase LV size
+
+lvextend -L +1G /dev/vgdata/lvsize
+
+# Grow XFS filesystem (online)
+
+xfs_growfs /mnt/data1
+
+# Verify
+
+df -h
+
+###############################
+
+# STEP 10: REDUCE LOGICAL VOLUME (SAFE METHOD)
+
+###############################
+
+# NOTE: XFS cannot shrink → recreate required
+
+umount /dev/vgdata/lvext
+
+lvreduce -L 1.5G /dev/vgdata/lvext
+
+# Recreate filesystem
+
+mkfs.xfs -f /dev/vgdata/lvext
+
+# Mount again
+
+mount /dev/vgdata/lvext /mnt/data2
+
+###############################
+
+# STEP 11: CLEANUP (WITHOUT REBOOT)
+
+###############################
+
+# Unmount all
+
+umount /mnt/data1
+umount /mnt/data2
+umount /mnt/backup
+
+# Remove fstab entries manually
+
+vi /etc/fstab
+
+# Remove LVs
+
+lvremove /dev/vgdata/lvsize -y
+lvremove /dev/vgdata/lvext -y
+lvremove /dev/vgcustom/lvnext -y
+
+# Remove VGs
+
+vgremove vgdata
+vgremove vgcustom
+
+# Remove PVs
+
+pvremove /dev/sdb1 /dev/sdb2 /dev/sdb3
+
+# Delete partitions
+
+fdisk /dev/sdb
+
+# d → delete partitions → w
+
+# Reload
+
+partprobe
+
+# Final check
+
+lsblk
+
+###############################
+
+# END OF LVM FLOW
+
+###############################

@@ -1,0 +1,122 @@
+
+2. Disable Password & Use Public/Private Key Authentication
+Question
+Your organisation wants to improve SSH security.
+Perform the following:
+•	Disable password authentication 
+•	Configure SSH login using public/private key 
+•	Create user secureuser 
+•	Generate SSH key pair on client 
+•	Copy public key to server 
+•	Ensure only key-based login works 
+Expected Concepts
+•	Generate key:
+ssh-keygen
+•	Copy key:
+ssh-copy-id secureuser@<server-ip>
+•	SSH config changes:
+PasswordAuthentication no
+PubkeyAuthentication yes
+•	Restart service 
+•	Verify login (should NOT ask password) 
+
+
+
+
+
+
+
+
+# ========================================================= 
+# SSH HARDENING LAB - KEY BASED AUTHENTICATION (ED25519) 
+# ========================================================= 
+# --------------------------------------------------------- 
+# QUESTION: 
+# Disable password authentication and configure SSH using 
+# public/private key authentication for user secureuser 
+# --------------------------------------------------------- 
+# ========================================================= 
+# STEP 1: CREATE USER (SERVER) 
+# ========================================================= 
+echo "Create user secureuser" 
+useradd secureuser 
+echo "Set password (temporary)" 
+passwd secureuser 
+# ========================================================= 
+# STEP 2: GENERATE SSH KEY (CLIENT) 
+# ========================================================= 
+echo "Generate key pair (ED25519)" 
+ssh-keygen -t ed25519 
+# Files created: 
+# ~/.ssh/id_ed25519 → Private key 
+# ~/.ssh/id_ed25519.pub → Public key 
+echo "Verify keys" 
+ls ~/.ssh/ 
+# ========================================================= 
+# STEP 3: COPY PUBLIC KEY TO SERVER 
+# ========================================================= 
+echo "Copy public key to server" 
+# Recommended method: 
+ssh-copy-id secureuser@192.168.220.130 
+# OR manual method (your approach corrected): 
+scp ~/.ssh/id_ed25519.pub secureuser@192.168.220.130:/home/secureuser/ 
+# Then on server: 
+mkdir -p /home/secureuser/.ssh 
+cat /home/secureuser/id_ed25519.pub >> /home/secureuser/.ssh/authorized_keys 
+# Fix permissions (VERY IMPORTANT): 
+chown -R secureuser:secureuser /home/secureuser/.ssh 
+chmod 700 /home/secureuser/.ssh 
+chmod 600 /home/secureuser/.ssh/authorized_keys 
+# ========================================================= 
+# STEP 4: VERIFY KEY LOGIN BEFORE HARDENING 
+# ========================================================= 
+echo "Test login" 
+ssh secureuser@192.168.220.130 
+# Expected: 
+# ✔ No password required 
+# ========================================================= 
+# STEP 5: EDIT SSH CONFIG (SERVER) 
+# ========================================================= 
+echo "Edit SSH configuration" 
+vim /etc/ssh/sshd_config 
+# Make sure these lines are set: 
+# -------------------------------- 
+PasswordAuthentication no 
+PubkeyAuthentication yes 
+PermitRootLogin yes 
+# -------------------------------- 
+# Save and exit (:wq) 
+# ========================================================= 
+# STEP 6: VALIDATE CONFIG 
+# ========================================================= 
+echo "Check config syntax" 
+sshd -t 
+# ========================================================= 
+# STEP 7: RESTART SSH SERVICE 
+# ========================================================= 
+echo "Restart SSH service" 
+systemctl restart sshd 
+# ========================================================= 
+# STEP 8: FINAL VERIFICATION 
+# ========================================================= 
+echo "Login using key (no password expected)" 
+ssh secureuser@192.168.220.130 
+# ========================================================= 
+# STEP 9: VERIFY CONFIG FILE LOCATION 
+# ========================================================= 
+echo "Check SSH config file" 
+rpm -qc openssh-server 
+# ========================================================= 
+# IMPORTANT FILES 
+# ========================================================= 
+# ~/.ssh/id_ed25519 → Private key (client) 
+# ~/.ssh/id_ed25519.pub → Public key 
+# /home/user/.ssh/authorized_keys → Server-side auth 
+# ========================================================= 
+# SECURITY NOTES 
+# ========================================================= 
+
+#  Always test SSH key login BEFORE disabling password 
+#  Wrong permissions will cause "Permission denied" 
+#  authorized_keys must be 600 
+#  .ssh directory must be 700 
