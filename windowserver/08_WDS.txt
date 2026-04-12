@@ -1,0 +1,269 @@
+============================================================
+📄 WINDOWS DEPLOYMENT SERVICES (WDS) – COMPLETE GUI LAB GUIDE
+============================================================
+
+LAB: WDS (PXE Boot) Configuration
+SERVER NAME: MASTER
+DOMAIN: master.ditiss2026.com
+PURPOSE: Deploy Windows OS over network using PXE
+
+============================================================
+PART 1: INSTALL WDS ROLE
+============================================================
+
+Server Manager
+→ Dashboard
+→ Click "Manage"
+→ Click "Add Roles and Features"
+→ Next
+→ Select: "Role-based or feature-based installation"
+→ Next
+→ Select Server: MASTER (local server)
+→ Next
+
+→ In "Server Roles"
+   → Scroll down
+   → Tick ✔ "Windows Deployment Services"
+   → Click "Add Features" (popup appears)
+→ Next
+
+→ Features Section
+   → Expand:
+      Remote Server Administration Tools
+         → Role Administration Tools
+            → ✔ Windows Deployment Services Tools
+   → Next
+
+→ Role Services
+   → ✔ Deployment Server
+   → ✔ Transport Server
+→ Next
+
+→ Confirm
+→ Click "Install"
+→ Wait till installation completes
+→ Click "Close"
+
+============================================================
+PART 2: CONFIGURE WDS
+============================================================
+
+Server Manager
+→ Top Right "Tools"
+→ Click "Windows Deployment Services"
+
+OR
+
+Server Manager
+→ Left Panel → "WDS"
+
+------------------------------------------------------------
+Inside WDS Console:
+------------------------------------------------------------
+
+Left Panel:
+→ Expand "Servers"
+→ Right-click on: MASTER.ditiss2026.com
+→ Click "Configure Server"
+
+------------------------------------------------------------
+Wizard Starts:
+------------------------------------------------------------
+
+→ "Before You Begin"
+→ Next
+
+→ Install Options:
+   ○ Integrated with Active Directory
+   ○ Standalone Server
+   → Select based on setup (usually ✔ AD Integrated)
+→ Next
+
+→ Remote Install Folder Location:
+   → Default: C:\RemoteInstall
+   → (You can change using Browse)
+→ Next
+
+⚠ WARNING:
+"The volume selected is also a system volume"
+
+→ Click "Yes"
+
+------------------------------------------------------------
+DHCP OPTION (IMPORTANT)
+------------------------------------------------------------
+
+If WDS + DHCP on SAME SERVER:
+
+→ Tick ✔ "Do not listen on DHCP ports"
+→ Tick ✔ "Configure DHCP option 60 to PXEClient"
+
+→ Next
+
+------------------------------------------------------------
+PXE SERVER INITIAL SETTINGS
+------------------------------------------------------------
+
+Options:
+   ○ Do not respond to any client computers
+   ○ Respond only to known client computers
+   ● Respond to all client computers (known and unknown)
+
+→ Select:
+   ✔ Respond to all client computers
+
+Optional:
+   ☐ Require administrator approval (leave unchecked for lab)
+
+→ Next
+
+→ Click "Finish"
+
+============================================================
+PART 3: MOUNT WINDOWS ISO
+============================================================
+
+(For Virtual Machine)
+
+→ Right-click VM
+→ Settings / Edit
+→ CD/DVD Drive
+→ Attach Windows 10/11 ISO
+→ OK / Apply
+
+------------------------------------------------------------
+
+Inside Windows Server:
+
+→ Open "This PC"
+→ Go to CD/DVD Drive (mounted ISO)
+
+→ Open ISO
+→ Press Ctrl + A (Select All)
+→ Right-click → Copy
+
+→ Go to:
+   E:\RemoteInstall   (or your selected path)
+
+→ Right-click → Paste
+
+============================================================
+PART 4: ADD BOOT IMAGE
+============================================================
+
+Open:
+→ Server Manager
+→ Tools → Windows Deployment Services
+
+→ Expand:
+   Servers
+   → MASTER
+
+→ Right-click "Boot Images"
+→ Click "Add Boot Image"
+
+→ Browse:
+   CD/DVD Drive
+   → sources
+   → Select: boot.wim
+→ Open
+
+→ Image Name: (default or rename)
+→ Next
+→ Next
+→ Finish
+
+============================================================
+PART 5: ADD INSTALL IMAGE
+============================================================
+
+Inside WDS Console:
+
+→ Expand Server → MASTER
+
+→ Right-click "Install Images"
+→ Click "Add Image Group"
+
+→ Enter Name:
+   Example: Windows10_Group
+→ Click OK
+
+------------------------------------------------------------
+
+→ Right-click newly created group (e.g., Windows10_Group)
+→ Click "Add Install Image"
+
+→ Browse:
+   CD/DVD Drive
+   → sources
+   → Select: install.wim
+→ Open
+
+→ Next
+→ Select required OS versions (tick required editions)
+→ Next
+→ Next
+→ Finish
+
+============================================================
+PART 6: FINAL CHECK
+============================================================
+
+Verify:
+
+→ Boot Images → boot.wim present
+→ Install Images → OS images listed
+→ Server status: Running
+
+============================================================
+PART 7: CLIENT SIDE (PXE BOOT)
+============================================================
+
+Client Machine:
+
+→ Power ON
+→ Enter BIOS/Boot Menu
+→ Enable Network Boot / PXE Boot
+→ Boot from Network
+
+→ WDS will respond
+→ Windows Deployment Wizard starts
+
+============================================================
+IMPORTANT NOTES (EXAM POINTS)
+============================================================
+
+✔ WDS uses PXE (Preboot Execution Environment)
+✔ Boot Image = boot.wim (used to start setup)
+✔ Install Image = install.wim (actual OS)
+✔ RemoteInstall folder stores all images
+✔ DHCP required for IP allocation
+✔ If DHCP on same server → configure options
+
+============================================================
+COMMON MISTAKES
+============================================================
+
+✘ Forgot to add boot image → PXE fails
+✘ Wrong path selection
+✘ DHCP not configured
+✘ ISO not copied properly
+✘ Not selecting "Respond to all clients"
+
+============================================================
+SCREENSHOTS EXPECTED BY EXAMINER
+============================================================
+
+1. Role Installation (WDS selected)
+2. WDS Console (Server expanded)
+3. Configure Server Wizard
+4. DHCP Options screen
+5. PXE Settings screen
+6. Boot Image added
+7. Install Image group created
+8. Install Image added
+9. RemoteInstall folder contents
+
+============================================================
+END OF FILE
+============================================================

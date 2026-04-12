@@ -1,0 +1,220 @@
+============================================================
+WINDOWS SERVER ADMINISTRATION – GUI STEP GUIDE (LAB READY)
+============================================================
+
+NOTE:
+Use this as a step-by-step navigation guide.
+"→" means next click / next step.
+
+============================================================
+1) CREATE LOCAL USER (GUI)
+============================================================
+
+Server Manager
+→ Dashboard
+→ Tools
+→ Computer Management
+
+Computer Management
+→ Local Users and Groups
+→ Users
+→ Right Click
+→ New User
+
+Fill Details:
+→ Username
+→ Full Name
+→ Description
+→ Password
+→ Confirm Password
+
+Select Options (as required):
+→ User must change password at next logon
+→ User cannot change password
+→ Password never expires
+→ Account is disabled
+
+→ Click Create
+→ Click Close
+
+
+============================================================
+2) CREATE LOCAL GROUP (GUI)
+============================================================
+
+Server Manager
+→ Dashboard
+→ Tools
+→ Computer Management
+
+Computer Management
+→ Local Users and Groups
+→ Groups
+→ Right Click
+→ New Group
+
+Fill Details:
+→ Group Name
+→ Description
+
+(Add members now or later)
+
+→ Click Create
+→ Click Close
+
+
+============================================================
+3) ADD USER TO GROUP (NORMAL GROUP)
+============================================================
+
+Server Manager
+→ Tools
+→ Computer Management
+
+Computer Management
+→ Local Users and Groups
+→ Groups
+→ Select Group (example: grp1)
+→ Double Click
+
+→ Click Add
+→ Enter Username
+→ Click Check Names
+→ OK
+→ Apply
+→ OK
+
+
+============================================================
+4) GIVE ADMIN PRIVILEGES TO USER
+============================================================
+
+Server Manager
+→ Tools
+→ Computer Management
+
+Computer Management
+→ Local Users and Groups
+→ Users
+→ Select User
+→ Right Click
+→ Properties
+
+→ Go to "Member Of" tab
+→ Click Add
+→ Type: Administrators
+→ Click Check Names
+→ OK
+→ Apply
+→ OK
+
+NOTE:
+Administrator group = full control
+Users group = default limited access
+
+
+============================================================
+5) CHANGE COMPUTER NAME (GUI)
+============================================================
+
+Server Manager
+→ Local Server
+
+→ Click on Computer Name
+
+System Properties Window:
+→ Click Change
+
+Computer Name Tab:
+→ Enter New Computer Name
+
+Choose:
+→ Workgroup (default) OR Domain
+
+→ Click OK
+→ Click Apply
+→ Restart System
+
+
+============================================================
+6) CHECK CURRENT IP CONFIGURATION
+============================================================
+
+Server Manager
+→ Local Server
+
+→ Check:
+   Ethernet → IPv4 Address
+   Computer Name
+   Domain/Workgroup
+
+
+============================================================
+7) CONFIGURE STATIC IP (GUI)
+============================================================
+
+Server Manager
+→ Local Server
+→ Click Ethernet (IP link)
+
+Network Connections Window:
+→ Select Ethernet0
+→ Double Click
+
+Ethernet Status:
+→ Click Properties
+
+→ Select: Internet Protocol Version 4 (TCP/IPv4)
+→ Click Properties
+
+Select:
+→ Use the following IP address
+
+Fill:
+→ IP Address:      192.168.119.110
+→ Subnet Mask:     255.255.255.0
+→ Default Gateway: 192.168.119.2
+
+(Optional DNS):
+→ Preferred DNS:   8.8.8.8
+→ Alternate DNS:   8.8.4.4
+
+→ Click OK
+→ Click Close
+
+
+============================================================
+8) VERIFY STATIC IP
+============================================================
+
+Server Manager
+→ Local Server
+
+→ Click Refresh icon
+
+→ Confirm:
+   New IP is updated
+
+
+============================================================
+9) COMMON TROUBLESHOOTING (IMPORTANT)
+============================================================
+
+IF user not created:
+→ Ensure you clicked "Create" before closing
+
+IF cannot add to group:
+→ Check username spelling
+→ Use "Check Names"
+
+IF no network after static IP:
+→ Verify Gateway and Subnet
+→ Disable/Enable network adapter
+
+IF computer name not changed:
+→ Restart system is mandatory
+
+
+============================================================
+END OF GUIDE
+============================================================

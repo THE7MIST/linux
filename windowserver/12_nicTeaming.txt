@@ -1,0 +1,258 @@
+========================================================
+LAB: NIC TEAMING + LOAD BALANCING (WINDOWS SERVER)
+========================================================
+
+CONCEPT OVERVIEW
+--------------------------------------------------------
+NIC Teaming:
+→ Combines multiple physical NICs into one logical interface
+→ Increases bandwidth (aggregation)
+→ Provides redundancy & fault tolerance
+→ Eliminates single point of failure
+→ Ensures high availability
+
+Example:
+eth0 (NIC1)
+eth1 (NIC2)
+   ↓
+→ Team Interface (e.g., Team0 / VM Switch / vEthernet)
+
+--------------------------------------------------------
+BENEFITS
+--------------------------------------------------------
+
+1) Increased Bandwidth
+→ Combines throughput of multiple NICs
+→ Aggregate bandwidth increases capacity
+→ Removes network bottlenecks
+
+2) Fault Tolerance
+→ Redundant paths available
+→ If one NIC fails → traffic shifts automatically
+→ Improves system resilience
+
+3) Reliability
+→ Automatic failover
+→ Continuous network connectivity
+→ Reduced downtime
+
+4) Load Balancing
+→ Traffic distributed across NICs
+→ Improves performance
+→ Prevents congestion
+
+--------------------------------------------------------
+LOAD BALANCING ALGORITHMS
+--------------------------------------------------------
+
+1) Address Hash
+→ Based on:
+   - Source/Destination IP
+   - Ports
+→ Suitable for general workloads
+
+2) Hyper-V Port
+→ Based on VM MAC address
+→ Each VM tied to specific NIC
+→ Used in virtualization environments
+
+3) Dynamic (Recommended)
+→ Combines Address Hash + Hyper-V Port
+→ Adjusts traffic dynamically
+→ Best performance
+
+--------------------------------------------------------
+TEAMING MODES
+--------------------------------------------------------
+
+1) Switch Independent
+→ No switch configuration required
+→ Each NIC connects to different switch (optional)
+→ Most commonly used
+
+2) LACP (Link Aggregation Control Protocol)
+→ Dynamic negotiation with switch
+→ Requires switch support/config
+
+3) Static Teaming
+→ Manual configuration on both server & switch
+→ No negotiation protocol
+
+--------------------------------------------------------
+FAILOVER STRATEGIES
+--------------------------------------------------------
+
+1) Active-Active
+→ All NICs actively handle traffic
+→ Maximum bandwidth utilization
+→ Load distributed across NICs
+→ Failover automatic
+
+2) Active-Passive
+→ One NIC active, others standby
+→ Standby NIC takes over on failure
+→ Easier management
+
+3) Load-Based Teaming
+→ Traffic distributed based on NIC load
+→ Dynamically adjusts for optimization
+→ Intelligent balancing
+
+--------------------------------------------------------
+PRACTICAL: NIC TEAMING (GUI STEP-BY-STEP)
+--------------------------------------------------------
+
+STEP 1: Open Server Manager
+→ Click Start
+→ Search "Server Manager"
+→ Open
+
+→ Server Manager Dashboard opens
+
+--------------------------------------------------------
+
+STEP 2: Navigate to NIC Teaming
+→ Click "Local Server" (left panel)
+→ Look at Properties section
+
+→ Find: "NIC Teaming"
+→ Status = Disabled
+
+→ Click "Disabled"
+
+--------------------------------------------------------
+
+STEP 3: Open NIC Teaming Window
+→ NIC Teaming window opens
+
+Sections:
+→ Servers
+→ Teams
+→ Adapters and Interfaces
+
+--------------------------------------------------------
+
+STEP 4: Create New Team
+→ In "Teams" section
+
+→ Click "Tasks"
+   ↓
+→ Select "New Team"
+
+--------------------------------------------------------
+
+STEP 5: Configure Team
+→ New Team window opens
+
+1) Team Name:
+→ Enter: Team0 (or any name)
+
+2) Select Members:
+→ Tick:
+   ☑ Ethernet0
+   ☑ Ethernet1
+   (your NICs)
+
+--------------------------------------------------------
+
+STEP 6: Additional Properties (IMPORTANT)
+→ Click "Additional properties" dropdown
+
+Configure:
+
+→ Teaming Mode:
+   → Select: Switch Independent (recommended)
+
+→ Load Balancing Mode:
+   → Select: Dynamic (recommended)
+
+→ Standby Adapter:
+   → None (for Active-Active)
+   OR select one NIC (for Active-Passive)
+
+--------------------------------------------------------
+
+STEP 7: Confirm Creation
+→ Click "OK"
+
+→ Team gets created
+
+--------------------------------------------------------
+
+STEP 8: Verify Team Interface
+→ Go to:
+   Control Panel
+   → Network and Sharing Center
+   → Change Adapter Settings
+
+→ You will see:
+   → New Adapter (Team0 or similar)
+
+→ Old NICs become part of team
+
+--------------------------------------------------------
+
+STEP 9: Assign IP Address
+→ Right-click Team Interface
+   ↓
+→ Properties
+   ↓
+→ Select "Internet Protocol Version 4 (IPv4)"
+   ↓
+→ Click Properties
+
+→ Set:
+   IP Address: (e.g., 192.168.x.x)
+   Subnet Mask
+   Default Gateway
+   DNS
+
+→ Click OK
+
+--------------------------------------------------------
+
+COMMON ISSUE + FIX
+--------------------------------------------------------
+
+Problem:
+→ eth0 / Ethernet not visible
+
+Fix:
+
+1) Add new NIC (if VM)
+→ Hyper-V Manager
+   → VM Settings
+   → Add Hardware
+   → Network Adapter
+   → Connect to Virtual Switch
+
+2) Assign IP to new NIC
+→ Control Panel → Network → Adapter Settings
+
+3) Disable Hyper-V Virtual Adapter (if conflict)
+→ Network Connections
+→ Right-click vEthernet
+→ Disable (if needed)
+
+--------------------------------------------------------
+
+VERIFICATION
+--------------------------------------------------------
+
+→ Open Command Prompt
+→ Run:
+   ipconfig
+
+→ Check:
+   → Team interface IP present
+
+→ Disable one NIC manually:
+   → Network Adapter → Disable
+
+→ Verify:
+   → Network still works (failover success)
+
+--------------------------------------------------------
+
+END OF LAB
+========================================================

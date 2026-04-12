@@ -1,0 +1,235 @@
+============================================================
+LAB: NFS CONFIGURATION (WINDOWS SERVER ↔ LINUX CLIENT)
+DATE: 1 April 2026
+SERVER NAME: MASTER
+SERVER IP: 192.168.119.128
+SHARE NAME: mychoice
+LOCAL PATH: C:\sharing_NFS
+REMOTE PATH: \\MASTER\sharing_NFS
+============================================================
+
+------------------------------------------------------------
+PART 1: INSTALL NFS ROLE ON WINDOWS SERVER
+------------------------------------------------------------
+
+Open Server Manager
+→ Click [Manage] (top right)
+→ Click [Add Roles and Features]
+
+→ Before You Begin screen
+→ Click [Next]
+
+→ Installation Type
+→ Select [Role-based or feature-based installation]
+→ Click [Next]
+
+→ Server Selection
+→ Select your server (e.g., MASTER)
+→ Click [Next]
+
+→ Server Roles
+→ Expand [File and Storage Services]
+    → Expand [File and iSCSI Services]
+        → Check [Server for NFS]
+            → Popup appears → Click [Add Features]
+
+→ Click [Next]
+
+→ Features
+→ (No changes required)
+→ Click [Next]
+
+→ Confirmation
+→ Check [Restart the destination server automatically if required]
+→ Click [Install]
+
+→ Wait for installation to complete
+→ Click [Close]
+
+------------------------------------------------------------
+PART 2: CREATE NFS SHARE (GUI CONFIGURATION)
+------------------------------------------------------------
+
+Open Server Manager
+→ Left panel → Click [File and Storage Services]
+→ Click [Shares]
+
+→ Top right → Click [Tasks]
+→ Click [New Share]
+
+→ Select Profile
+→ Choose [NFS Share – Quick]
+→ Click [Next]
+
+→ Share Location
+→ Select [Type a custom path]
+→ Enter: C:\sharing_NFS
+→ Click [Next]
+
+→ Share Name
+→ Share name: mychoice
+→ (Auto remote path shown as \\MASTER\sharing_NFS)
+→ Click [Next]
+
+------------------------------------------------------------
+AUTHENTICATION SETTINGS
+------------------------------------------------------------
+
+→ Specify authentication methods:
+
+[ ] Kerberos v5 authentication
+[ ] Kerberos v5 integrity
+[ ] Kerberos v5 privacy
+
+✔ Select: [No server authentication (AUTH_SYS)]
+
+→ Check: [Enable unmapped user access]
+
+→ Select:
+    (•) Allow unmapped user access by UID/GID
+    ( ) Allow anonymous access
+
+→ Click [Next]
+
+------------------------------------------------------------
+SHARE PERMISSIONS
+------------------------------------------------------------
+
+→ Click [Add]
+
+→ Add Permission window:
+
+Select one:
+    (•) All machines
+    ( ) Host (specific IP)
+    ( ) Netgroup
+    ( ) Client group
+
+→ Language Encoding: ANSI
+
+→ Permissions:
+    ✔ Read / Write
+
+→ [ ] Allow root access (NOT recommended → leave unchecked)
+
+→ Click [Add]
+
+→ Click [Next]
+
+------------------------------------------------------------
+CONFIRMATION
+------------------------------------------------------------
+
+→ Review all settings
+→ Click [Create]
+
+→ Wait for completion
+→ Click [Close]
+
+------------------------------------------------------------
+PART 3: LINUX CLIENT (CENTOS) CONFIGURATION
+------------------------------------------------------------
+
+Open Terminal
+
+→ Install NFS utilities:
+# dnf install -y nfs-utils
+
+→ Create mount directory:
+# mkdir /mnt/win-nfs
+
+→ Mount NFS share:
+# mount -t nfs 192.168.119.128:/sharing_NFS /mnt/win-nfs
+
+→ Verify mount:
+# df -h
+
+→ (Optional persistent mount)
+Edit fstab:
+# nano /etc/fstab
+
+Add line:
+192.168.119.128:/sharing_NFS   /mnt/win-nfs   nfs   defaults   0 0
+
+→ Apply:
+# mount -a
+
+------------------------------------------------------------
+PART 4: WINDOWS CLIENT ACCESS (OPTIONAL)
+------------------------------------------------------------
+
+METHOD 1: POWERSHELL MOUNT
+
+Open PowerShell as Administrator
+
+→ Create drive mapping:
+PS> New-PSDrive -Name Z -PSProvider FileSystem -Root "\\10.0.0.101\nfsshare01"
+
+→ Access via Z:
+
+→ To unmount:
+PS> Remove-PSDrive Z
+
+------------------------------------------------------------
+PART 5: INSTALL NFS CLIENT ON WINDOWS
+------------------------------------------------------------
+
+Open Server Manager
+→ Click [Manage]
+→ Click [Add Roles and Features]
+
+→ Go to [Features]
+
+→ Scroll down
+→ Expand [Services for NFS]
+
+✔ Check [Client for NFS]
+
+→ Click [Next]
+→ Click [Install]
+→ Click [Close]
+
+------------------------------------------------------------
+ALTERNATIVE METHOD (CLIENT MACHINE)
+------------------------------------------------------------
+
+→ Open Start Menu
+→ Search: "Windows Features"
+→ Click [Turn Windows features on or off]
+
+→ Expand:
+    → Services for NFS
+
+✔ Enable:
+    → Client for NFS
+
+→ Click [OK]
+→ Restart if prompted
+
+------------------------------------------------------------
+VERIFICATION
+------------------------------------------------------------
+
+→ From Linux:
+# ls /mnt/win-nfs
+
+→ From Windows:
+→ Access shared path:
+\\MASTER\sharing_NFS
+
+------------------------------------------------------------
+NOTES (IMPORTANT FOR EXAM)
+------------------------------------------------------------
+
+- Use AUTH_SYS for simple setup
+- Avoid enabling root access unless required
+- Ensure firewall allows NFS (port 2049)
+- Ensure correct IP mapping between client & server
+- Always verify mount using df -h
+- Use correct path format:
+    Linux: server_ip:/share
+    Windows: \\server\share
+
+============================================================
+END OF LAB
+============================================================

@@ -1,0 +1,350 @@
+========================================================
+📄 WINDOWS SERVER IIS FULL GUI LAB GUIDE
+========================================================
+LAB: IIS CONFIGURATION (INSTALL + DEFAULT PAGE + VIRTUAL DIR + WEBSITE + AUTH)
+DATE: 31 March 2026
+SERVER NAME: MASTER
+========================================================
+
+
+========================================================
+1) INSTALL IIS (WEB SERVER)
+========================================================
+
+Server Manager
+→ Top Right → Manage
+→ Click → Add Roles and Features
+
+→ Before You Begin Page
+→ Click → Next
+
+→ Installation Type
+→ Select → Role-based or feature-based installation
+→ Next
+
+→ Server Selection
+→ Select your server (MASTER)
+→ Next
+
+→ Server Roles
+→ Tick → Web Server (IIS)
+→ Popup appears → Click → Add Features
+
+→ Expand Web Server (IIS)
+→ Expand Web Server
+→ Expand Common HTTP Features
+
+→ Ensure following are checked:
+   ✔ Default Document
+   ✔ Directory Browsing
+   ✔ HTTP Errors
+   ✔ Static Content
+
+→ Expand Health and Diagnostics
+   ✔ HTTP Logging
+
+→ Expand Performance
+   ✔ Static Content Compression
+
+→ Expand Security
+   ✔ Request Filtering
+   ✔ Basic Authentication (IMPORTANT for later)
+
+→ Click → Next
+
+→ Features Page
+→ Leave default → Next
+
+→ IIS Role Services Page
+→ Verify all above selected → Next
+
+→ Confirmation Page
+→ Tick → Restart the destination server automatically (if required)
+→ Click → Install
+
+→ Installation Progress
+→ Wait until completed
+
+→ Click → Close
+
+
+========================================================
+2) VERIFY IIS IN BROWSER
+========================================================
+
+Open Browser (Edge / Chrome)
+→ Type → http://localhost
+→ Press Enter
+
+→ Expected Output:
+   IIS Default Page (Welcome page)
+
+Default IIS root directory:
+→ C:\inetpub\wwwroot
+
+→ NOTE (Exam Point):
+   This is where default website files are stored
+
+
+========================================================
+3) CHANGE DEFAULT DOCUMENT (INDEX PAGE)
+========================================================
+
+Server Manager
+→ Top Right → Tools
+→ Click → Internet Information Services (IIS) Manager
+
+→ Left Panel (Connections)
+→ Expand → MASTER
+→ Expand → Sites
+→ Click → Default Web Site
+
+→ Middle Panel
+→ Double Click → Default Document
+
+→ Right Panel (Actions)
+→ Click → Add
+
+→ Enter File Name:
+   cdae.html
+
+→ Click → OK
+
+→ Move file to top (IMPORTANT):
+→ Select cdae.html
+→ Click → Move Up (until first position)
+
+→ Now create file physically:
+
+File Explorer
+→ Go to → C:\inetpub\wwwroot
+→ Right Click → New → Text Document
+→ Rename → cdae.html
+→ Open → Add simple HTML → Save
+
+→ Test:
+Browser → http://localhost
+→ New page should load
+
+
+========================================================
+4) CONFIGURE VIRTUAL DIRECTORY
+========================================================
+
+Server Manager
+→ Tools → IIS Manager
+
+→ Left Panel
+→ Expand → MASTER → Sites → Default Web Site
+
+→ Right Click → Default Web Site
+→ Click → Add Virtual Directory
+
+→ Fill details:
+
+   Alias:
+   cdae
+
+   Physical Path:
+   C:\inetpub\wwwroot\cdae
+
+→ Click → OK
+
+→ Now create folder:
+
+File Explorer
+→ Go to → C:\inetpub\wwwroot
+→ Create Folder → cdae
+
+→ Inside folder:
+→ Create → index.html
+
+→ Add sample HTML → Save
+
+→ Test:
+Browser → http://localhost/cdae
+→ Output should display page
+
+
+========================================================
+5) ADD WEBSITE (VIRTUAL HOST)
+========================================================
+
+Server Manager
+→ Tools → IIS Manager
+
+→ Left Panel
+→ Right Click → Sites
+→ Click → Add Website
+
+→ Fill details:
+
+   Site Name:
+   sniper
+
+   Physical Path:
+   C:\inetpub\sniper
+
+→ Create folder before OK:
+   File Explorer → C:\inetpub → New Folder → sniper
+
+→ Binding:
+
+   Type: HTTP
+   IP Address: All Unassigned
+   Port: 80
+
+   Host Name:
+   www.sniper.com
+
+→ Click → OK
+
+→ Add index file:
+   Go to → C:\inetpub\sniper
+→ Create → index.html
+
+→ Add content → Save
+
+→ Configure DNS/Hosts (IMPORTANT for exam):
+
+→ Open Notepad as Administrator
+→ Open file:
+   C:\Windows\System32\drivers\etc\hosts
+
+→ Add:
+   127.0.0.1    www.sniper.com
+
+→ Save
+
+→ Test:
+Browser → http://www.sniper.com
+
+
+========================================================
+6) BASIC AUTHENTICATION CONFIGURATION
+========================================================
+
+STEP 1: CREATE SECURE FOLDER
+
+File Explorer
+→ Go to → C:\inetpub
+→ Create Folder → al
+
+→ Inside:
+→ Create Folder → secret
+
+→ Path:
+C:\inetpub\al\secret
+
+→ Inside secret:
+→ Create → index.html
+
+
+--------------------------------------------------------
+STEP 2: SET USER PERMISSIONS
+--------------------------------------------------------
+
+Right Click → secret folder
+→ Properties
+→ Security Tab
+→ Click → Edit
+→ Click → Add
+
+→ Enter User Name (example: student / administrator)
+→ Click → Check Names
+→ OK
+
+→ Select added user
+→ Tick → Full Control (or required permissions)
+→ Apply → OK
+
+
+--------------------------------------------------------
+STEP 3: CREATE VIRTUAL DIRECTORY FOR AUTH
+--------------------------------------------------------
+
+IIS Manager
+→ Sites → Default Web Site
+
+→ Right Click → Add Virtual Directory
+
+   Alias:
+   auth
+
+   Physical Path:
+   C:\inetpub\al\secret
+
+→ OK
+
+
+--------------------------------------------------------
+STEP 4: ENABLE BASIC AUTH
+--------------------------------------------------------
+
+IIS Manager
+→ Select → auth (virtual directory)
+
+→ Middle Panel
+→ Double Click → Authentication
+
+→ Disable:
+   Anonymous Authentication
+
+→ Enable:
+   Basic Authentication
+
+→ Right Panel → Click → Enable
+
+
+--------------------------------------------------------
+STEP 5: RESTART IIS SERVICE
+--------------------------------------------------------
+
+Server Manager
+→ Tools → Services
+
+→ Find:
+   World Wide Web Publishing Service
+
+→ Right Click → Restart
+
+
+--------------------------------------------------------
+STEP 6: TEST AUTHENTICATION
+--------------------------------------------------------
+
+Browser
+→ http://localhost/auth
+
+→ Prompt appears:
+   Enter Username & Password
+
+→ After login → Page loads
+
+
+========================================================
+EXAM IMPORTANT NOTES
+========================================================
+
+• Default Path:
+  C:\inetpub\wwwroot
+
+• Virtual Directory:
+  Logical mapping → physical folder
+
+• Website:
+  Separate site with hostname binding
+
+• Hostname works only after DNS/hosts entry
+
+• Basic Auth requires:
+  - Authentication enabled
+  - NTFS permissions set
+
+• Service name:
+  World Wide Web Publishing Service
+
+
+========================================================
+END OF FILE
+========================================================

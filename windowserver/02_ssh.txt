@@ -1,0 +1,232 @@
+================ WINDOWS REMOTE MANAGEMENT (SSH SETUP GUIDE) ================
+
+OBJECTIVE:
+Configure OpenSSH Server on Windows, enable service, allow firewall access,
+and test SSH connection.
+
+==========================================================================
+
+STEP 1 → OPEN SERVICES
+----------------------------------------
+Server Manager 
+    → Tools 
+        → Services
+
+(Alternative)
+Win + R → type: services.msc → Enter
+
+--------------------------------------------------------------------------
+
+STEP 2 → START OpenSSH SERVER SERVICE
+----------------------------------------
+Services window
+    → Scroll down
+        → Locate: OpenSSH SSH Server
+
+            → Right Click
+                → Properties
+
+                    → Startup type:
+                        → Select: Automatic
+
+                    → Click: Apply
+                        → Click: OK
+
+            → Again Right Click
+                → Click: Start
+
+--------------------------------------------------------------------------
+
+STEP 3 → VERIFY SERVICE RUNNING
+----------------------------------------
+Check Status column:
+    OpenSSH SSH Server → Status should be: Running
+
+--------------------------------------------------------------------------
+
+STEP 4 → CHECK PORT 22 LISTENING
+----------------------------------------
+Open Command Prompt (Admin)
+
+    → Run:
+        netstat -an | find "22"
+
+Expected Output:
+    TCP    0.0.0.0:22     LISTENING
+
+Meaning:
+    SSH server is actively listening on port 22
+
+--------------------------------------------------------------------------
+
+STEP 5 → CONFIGURE WINDOWS FIREWALL
+----------------------------------------
+
+Server Manager
+    → Tools
+        → Windows Defender Firewall with Advanced Security
+
+            → Click: Inbound Rules (left panel)
+
+                → Locate:
+                    OpenSSH SSH Server (sshd)
+
+                        → If NOT found:
+                            Right Panel → New Rule
+                                → Port
+                                    → TCP
+                                    → Specific Ports: 22
+                                        → Allow the connection
+                                            → Select Profiles:
+                                                [✔] Domain
+                                                [✔] Private
+                                                [✔] Public
+                                                    → Name: SSH
+
+                        → If FOUND:
+                            → Double Click Rule
+
+                                → Go to "Protocols and Ports"
+                                    → Protocol: TCP
+                                    → Port: 22
+
+                                → Go to "Advanced" Tab
+                                    → Ensure Profiles:
+                                        [✔] Domain
+                                        [✔] Private
+                                        [✔] Public
+
+                                → Click Apply → OK
+
+--------------------------------------------------------------------------
+
+STEP 6 → UNDERSTAND NETWORK PROFILES
+----------------------------------------
+
+Private:
+    → Trusted network (Home/Office)
+    → Device discovery enabled
+    → Recommended for SSH testing
+
+Public:
+    → Untrusted network
+    → Strict security
+    → SSH may be blocked unless explicitly enabled
+
+Domain:
+    → Controlled by Active Directory
+    → Used in enterprise environments
+
+--------------------------------------------------------------------------
+
+STEP 7 → USER ACCESS CONTROL FOR SSH
+----------------------------------------
+
+By Default:
+    Only these users can login via SSH:
+        → Administrators
+        → OpenSSH Users group
+
+----------------------------------------
+
+TO ADD USER TO SSH ACCESS:
+
+Computer Management
+    → Local Users and Groups
+        → Groups
+            → OpenSSH Users
+
+                → Double Click
+                    → Add
+
+                        → Enter Username
+                            → Check Names
+                                → OK
+
+--------------------------------------------------------------------------
+
+STEP 8 → OPTIONAL CONFIG (ADVANCED)
+----------------------------------------
+
+SSH Config File Path:
+    C:\ProgramData\ssh\sshd_config
+
+Open using Notepad (Run as Administrator)
+
+Example modifications:
+
+    AllowUsers username
+    PermitRootLogin no
+    PasswordAuthentication yes
+
+After changes:
+    Restart service
+
+        → Services
+            → OpenSSH SSH Server
+                → Restart
+
+--------------------------------------------------------------------------
+
+STEP 9 → CONNECT USING SSH
+----------------------------------------
+
+From Client Machine / Same Machine:
+
+Command Prompt / PowerShell:
+
+    ssh username@<SERVER_IP>
+
+Example:
+    ssh administrator@192.168.1.100
+
+--------------------------------------------------------------------------
+
+STEP 10 → TROUBLESHOOTING
+----------------------------------------
+
+IF CONNECTION FAILS:
+
+1. Check Service:
+    → Must be Running
+
+2. Check Port:
+    → netstat -an | find "22"
+
+3. Check Firewall:
+    → Port 22 allowed in Inbound Rules
+
+4. Check Network Profile:
+    → Set to Private (for testing)
+
+5. Check User Permissions:
+    → User must be in:
+        OpenSSH Users OR Administrators
+
+6. Check IP:
+    → ipconfig → verify correct IP
+
+7. Restart Service:
+    → OpenSSH SSH Server → Restart
+
+--------------------------------------------------------------------------
+
+EXPECTED LAB OUTPUT / SCREENSHOTS
+----------------------------------------
+
+1. Services window showing:
+    → OpenSSH SSH Server → Running
+
+2. Firewall rule:
+    → OpenSSH SSH Server enabled
+
+3. Command Output:
+    → netstat showing port 22 LISTENING
+
+4. SSH login success:
+    → Terminal connected to server
+
+==========================================================================
+
+END OF GUIDE
+==========================================================================

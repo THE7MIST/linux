@@ -1,0 +1,313 @@
+========================================================
+LAB: FTP SERVER CONFIGURATION (WINDOWS SERVER - IIS)
+========================================================
+
+SERVER NAME: __________
+IP ADDRESS: __________
+DATE: __________
+
+========================================================
+PART 1: INSTALL FTP (IIS ROLE)
+========================================================
+
+Start
+→ Click [Start]
+→ Open [Server Manager]
+
+→ Top Menu → Click [Manage]
+→ Click [Add Roles and Features]
+
+→ Add Roles and Features Wizard Opens
+
+→ Before You Begin
+   → Click [Next]
+
+→ Installation Type
+   → Select [Role-based or feature-based installation]
+   → Click [Next]
+
+→ Server Selection
+   → Select your server (hostname)
+   → Click [Next]
+
+→ Server Roles
+   → Scroll → Find [Web Server (IIS)]
+   → Check ✔ [Web Server (IIS)]
+      → Popup appears → Click [Add Features]
+   → Expand [Web Server (IIS)]
+      → Expand [FTP Server]
+         → Check ✔ [FTP Service]
+         → (Optional) Check ✔ [FTP Extensibility]
+   → Click [Next]
+
+→ Features
+   → Keep default
+   → Click [Next]
+
+→ Web Server Role (IIS)
+   → Click [Next]
+
+→ Role Services
+   → Ensure:
+      ✔ FTP Service is selected
+   → Click [Next]
+
+→ Confirmation
+   → Click [Install]
+
+→ Wait for installation to complete
+
+→ If prompted:
+   → Click [Restart the destination server]
+
+--------------------------------------------------------
+VERIFY INSTALLATION
+--------------------------------------------------------
+Server Manager
+→ Tools
+→ Internet Information Services (IIS) Manager
+
+→ Expand Server Name
+→ You should see:
+   → Sites
+   → Default Web Site
+   → (FTP available)
+
+========================================================
+PART 2: CONFIGURE FTP FIREWALL (PASSIVE MODE)
+========================================================
+
+Start
+→ Open [Server Manager]
+
+→ Tools
+→ Open [IIS Manager]
+
+→ Left Panel → Click [Server Name]
+
+→ Middle Panel → Double-click [FTP Firewall Support]
+
+→ In "Data Channel Port Range"
+   → Enter: 60000-61000
+
+→ External IP Address (if required)
+   → Enter Server Public IP (optional for lab)
+
+→ Right Panel → Click [Apply]
+
+--------------------------------------------------------
+IMPORTANT NOTE:
+--------------------------------------------------------
+This port range must be allowed in firewall if external access is needed.
+
+========================================================
+PART 3: RESTART FTP SERVICE
+========================================================
+
+Start
+→ Tools
+→ Services
+
+→ Find: [Microsoft FTP Service]
+
+→ Right Click → Click [Restart]
+
+========================================================
+PART 4: CREATE USERS AND GROUP (FOR AUTHORIZATION)
+========================================================
+
+Start
+→ Run → Type: lusrmgr.msc → Enter
+
+→ Local Users and Groups opens
+
+→ Create Group
+   → Click [Groups]
+   → Right Click → New Group
+   → Group Name: ftpusers (or ftpditiss as per note)
+   → Click [Create] → Close
+
+→ Create User
+   → Click [Users]
+   → Right Click → New User
+   → Username: testuser (example)
+   → Set Password
+   → Uncheck "User must change password"
+   → Click [Create] → Close
+
+→ Add User to Group
+   → Go to [Groups]
+   → Double Click [ftpusers]
+   → Click [Add]
+   → Type username → Click [Check Names]
+   → Click [OK] → OK
+
+========================================================
+PART 5: CREATE FTP DIRECTORY + PERMISSIONS
+========================================================
+
+→ Open File Explorer
+
+→ Navigate:
+   C:\inetpub\ftproot
+
+→ Right Click → New Folder
+   → Name: FTPsite01
+
+→ Right Click Folder → Properties
+   → Go to [Security] Tab
+   → Click [Edit]
+   → Click [Add]
+
+→ Enter:
+   ftpusers (or your group/user)
+
+→ Click [Check Names] → OK
+
+→ Select user/group
+   → Enable ✔ Full Control
+
+→ Click [Apply] → OK
+
+========================================================
+PART 6: ADD FTP SITE (IIS)
+========================================================
+
+Start
+→ Server Manager
+→ Tools
+→ IIS Manager
+
+→ Left Panel → Expand Server Name
+
+→ Right Click [Sites]
+→ Click [Add FTP Site]
+
+--------------------------------------------------------
+FTP SITE CONFIGURATION WIZARD
+--------------------------------------------------------
+
+→ FTP Site Name:
+   FTPsite01
+
+→ Physical Path:
+   C:\inetpub\ftproot\FTPsite01
+
+→ Click [Next]
+
+--------------------------------------------------------
+BINDING AND SSL SETTINGS
+--------------------------------------------------------
+
+→ Binding IP Address:
+   Select Server IP
+
+→ Port:
+   21
+
+→ SSL:
+   Select [No SSL] (for lab)
+
+→ Click [Next]
+
+--------------------------------------------------------
+AUTHENTICATION & AUTHORIZATION
+--------------------------------------------------------
+
+=============================
+SCENARIO 1: ANONYMOUS ACCESS
+=============================
+
+→ Authentication:
+   ✔ Anonymous
+
+→ Authorization:
+   Allow access to:
+   → Select [Anonymous Users]
+
+→ Permissions:
+   ✔ Read
+   (Write optional)
+
+→ Click [Finish]
+
+=============================
+SCENARIO 2: USER/GROUP BASED
+=============================
+
+→ Authentication:
+   ✔ Basic
+
+→ Authorization:
+   → Select [Specified roles or user groups]
+
+→ Enter:
+   ftpusers
+
+→ Permissions:
+   ✔ Read
+   ✔ Write
+
+→ Click [Finish]
+
+========================================================
+PART 7: VERIFY FTP SITE
+========================================================
+
+→ IIS Manager
+→ Expand Sites
+→ Select FTPsite01
+
+→ Right Panel → Click [Browse FTP Site]
+
+OR
+
+→ Browser / File Explorer:
+   ftp://<server-ip>
+
+========================================================
+PART 8: CLIENT CONFIGURATION (FILEZILLA)
+========================================================
+
+Download:
+https://filezilla-project.org/download.php?type=client
+
+→ Install FileZilla
+
+→ Open FileZilla
+
+→ Enter:
+   Host: ftp://<server-ip>
+   Username: testuser (or anonymous)
+   Password: ********
+   Port: 21
+
+→ Click [Quickconnect]
+
+→ Verify:
+   → Left: Local files
+   → Right: Server files
+
+→ Try:
+   → Upload file
+   → Download file
+
+========================================================
+COMMON ERRORS + FIX
+========================================================
+
+1. Connection Timeout
+   → Check Firewall (port 21 + passive ports)
+
+2. Login Failed
+   → Check user/group permissions
+
+3. Cannot Upload
+   → Ensure WRITE permission enabled
+
+4. Passive Mode Issues
+   → Verify port range in IIS + firewall
+
+========================================================
+END OF LAB
+========================================================

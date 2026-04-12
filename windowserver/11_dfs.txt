@@ -1,0 +1,305 @@
+========================================================
+LAB: DFS (Distributed File System) – FULL GUI GUIDE
+DATE: 7 April 2026
+SERVER NAME: MASTER
+========================================================
+
+
+-------------------------------
+1. THEORY: DFS OVERVIEW
+-------------------------------
+
+DFS (Distributed File System)
+→ Provides access to same data from multiple locations
+→ Data stored on different physical servers but appears unified
+
+Purpose:
+→ Centralized access
+→ Load distribution
+→ Fault tolerance
+→ High availability
+
+Example:
+
+BEFORE DFS:
+X: \\S1\Doc
+Y: \\S2\Pic
+Z: \\S3\Med
+
+AFTER DFS:
+Single path:
+\\DFS01\sharedfiles
+   → Doc
+   → Pic
+   → Med
+
+
+-------------------------------
+2. TYPES OF DISTRIBUTED FS
+-------------------------------
+
+→ Windows DFS
+→ NFS (Network File System)
+→ SMB (Server Message Block)
+→ GFS (Google File System)
+→ Lustre
+→ HDFS (Hadoop Distributed FS)
+→ GlusterFS
+→ More...
+
+
+-------------------------------
+3. HOW DFS WORKS
+-------------------------------
+
+A. DISTRIBUTION
+→ Data split across multiple servers (nodes)
+→ Each node contributes computing power
+→ Parallel processing enabled
+
+B. REPLICATION
+→ Same data copied to multiple servers
+→ Ensures:
+   → Fault tolerance
+   → High availability
+   → Data recovery
+
+C. DFS NAMESPACE
+→ Virtual folder containing links
+→ Links point to shared folders on different servers
+
+
+-------------------------------
+4. DFS STRUCTURE (CONCEPT)
+-------------------------------
+
+Namespace Server
+   ↓
+Namespace Root (e.g., \\MASTER\DFS01)
+   ↓
+Folders (Links)
+   ↓
+Folder Targets (Actual Shares)
+
+Example:
+\\MASTER\DFS01
+   → Tools → \\FS01\Tools (London)
+            → \\FS02\Tools (New York)
+   → Docs  → \\FS02\Doc
+
+
+-------------------------------
+5. DFS REPLICATION
+-------------------------------
+
+→ Replication duplicates data across servers
+→ Sync between 2 or more locations
+
+Replication Group:
+→ Members (servers)
+→ Replicated folders
+
+Example:
+Projects + Documents replicated
+Between:
+Server1 ↔ Server2
+
+
+========================================================
+6. INSTALLATION (ROLES & FEATURES)
+========================================================
+
+Server Manager
+→ Click "Manage"
+→ Click "Add Roles and Features"
+→ Click "Next"
+→ Select "Role-based or feature-based installation"
+→ Click "Next"
+→ Select server (MASTER)
+→ Click "Next"
+
+→ Expand:
+   File and Storage Services
+      → File and iSCSI Services
+
+→ Select:
+   ✔ File Server (must be installed)
+   ✔ DFS Namespaces
+   ✔ DFS Replication
+
+→ Click "Next"
+→ Click "Install"
+→ Wait for completion
+→ Click "Close"
+
+
+========================================================
+7. OPEN DFS MANAGEMENT
+========================================================
+
+Start Menu
+→ Windows Administrative Tools
+→ DFS Management
+
+
+========================================================
+8. CREATE NEW DFS NAMESPACE
+========================================================
+
+DFS Management
+→ Right-click "Namespaces"
+→ Click "New Namespace"
+
+Wizard Opens:
+
+STEP 1: Namespace Server
+→ Enter server name: MASTER
+→ Click "Next"
+
+STEP 2: Namespace Name and Settings
+→ Enter Name: DFS01
+→ Click "Edit Settings"
+   → Local path:
+      Default: C:\DFSRoots\DFS01
+   → Modify if needed
+→ Click "OK"
+→ Click "Next"
+
+STEP 3: Namespace Type
+→ Select:
+   ○ Domain-based namespace (Recommended)
+   ○ Stand-alone namespace
+
+→ Choose: Domain-based
+→ Click "Next"
+
+STEP 4: Review
+→ Click "Create"
+→ Click "Close"
+
+
+========================================================
+9. CONFIGURE PERMISSIONS
+========================================================
+
+DFS Namespace created
+
+→ Right-click Namespace (DFS01)
+→ Click "Properties"
+→ Go to "Security" tab
+
+→ Click "Edit"
+→ Click "Add"
+→ Enter: Domain Users
+→ Click "Check Names"
+→ Click "OK"
+
+→ Grant:
+   ✔ Full Control (or as required)
+
+→ Click "Apply"
+→ Click "OK"
+
+
+========================================================
+10. CREATE DFS FOLDERS
+========================================================
+
+DFS Management
+→ Expand Namespaces
+→ Click \\MASTER\DFS01
+
+→ Right-click → "New Folder"
+
+STEP:
+→ Enter Name: TestFolder
+→ Click "Add"
+
+→ Enter Folder Target:
+   \\Server\SharedFolder
+   Example:
+   \\FS01\Tools
+
+→ Click "OK"
+→ Click "OK"
+
+
+========================================================
+11. ADD MULTIPLE FOLDER TARGETS
+========================================================
+
+→ Right-click Folder (TestFolder)
+→ Click "Add Folder Target"
+
+→ Enter:
+   \\FS02\Tools
+
+→ Click "OK"
+
+(Now redundancy enabled)
+
+
+========================================================
+12. DFS REPLICATION SETUP
+========================================================
+
+→ Right-click Folder
+→ Click "Add Folder Target" (if not already multiple)
+
+→ After multiple targets:
+   → Wizard prompts for replication
+
+→ Click "Yes"
+
+Replication Wizard:
+
+→ Select servers
+→ Choose topology:
+   ○ Full Mesh (recommended for small setups)
+
+→ Set bandwidth (optional)
+
+→ Choose primary member
+
+→ Click "Next"
+→ Click "Create"
+
+
+========================================================
+13. FINAL STRUCTURE
+========================================================
+
+Namespace:
+\\MASTER\DFS01
+
+Folders:
+→ Tools
+→ Documents
+
+Targets:
+→ \\FS01\Tools
+→ \\FS02\Tools
+
+Replication:
+→ Enabled
+→ Data synchronized automatically
+
+
+========================================================
+14. IMPORTANT NOTES
+========================================================
+
+→ Namespace = Logical structure
+→ Folder = Link
+→ Folder Target = Actual shared folder
+→ Replication = Data sync between servers
+
+→ Always:
+   ✔ Configure permissions
+   ✔ Use domain-based namespace in enterprise
+   ✔ Ensure network connectivity
+
+
+========================================================
+END OF LAB
+========================================================

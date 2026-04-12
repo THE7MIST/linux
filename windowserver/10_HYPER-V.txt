@@ -1,0 +1,326 @@
+========================================================
+LAB: HYPER-V INSTALLATION & VM CONFIGURATION (GUI GUIDE)
+DATE: 2 April 2026
+========================================================
+
+-------------------------------
+1. THEORY: VIRTUALIZATION
+-------------------------------
+Virtualization:
+→ An abstraction of an execution environment
+→ Dynamically provided to authorized users
+→ Uses well-defined protocols
+→ Allows resource sharing and isolation
+
+Key Concept:
+→ Resource pooling + isolation using Hypervisor
+
+-------------------------------
+ADVANTAGES
+-------------------------------
+→ Run OS without dedicated physical hardware
+→ Faster VM creation and backup
+→ Clean OS environments for testing
+→ Efficient resource utilization
+→ Easy scaling and migration
+
+-------------------------------
+ARCHITECTURE COMPARISON
+-------------------------------
+
+[PHYSICAL HOST]
+→ One application per server
+→ Slow deployment
+→ Low utilization
+→ Scaling issues
+→ Migration difficult
+→ Hard to replicate locally
+
+[VIRTUAL MACHINES]
+→ One physical server → multiple VMs
+→ Each VM has:
+   → Guest OS
+   → Application
+→ Better utilization
+→ Easier scaling
+→ Cloud compatible
+→ Still requires full OS
+→ Portability limited
+
+[CONTAINERS]
+→ Application-layer virtualization
+→ No full OS required
+→ Faster startup
+→ Uses shared kernel
+→ Lightweight & portable
+
+--------------------------------------------------------
+2. INSTALLATION OF HYPER-V (GUI STEP-BY-STEP)
+--------------------------------------------------------
+
+Open Server Manager
+→ Click Start Menu
+→ Search "Server Manager"
+→ Open
+
+→ Dashboard opens
+
+Click:
+→ "Manage" (top-right)
+→ Select "Add Roles and Features"
+
+Wizard Opens:
+→ Click "Next"
+
+Installation Type:
+→ Select "Role-based or feature-based installation"
+→ Click Next
+
+Server Selection:
+→ Select your server (e.g., MASTER)
+→ Click Next
+
+Server Roles:
+→ Scroll down
+→ Check ✔ "Hyper-V"
+
+Popup appears:
+→ Click "Add Features"
+
+→ Click Next
+
+Features:
+→ Keep default
+→ Click Next
+
+Hyper-V Page:
+→ Click Next
+
+Virtual Switches:
+→ Select your Network Adapter (Ethernet)
+→ Tick ✔ your NIC (e.g., Intel Ethernet)
+→ Click Next
+
+Migration:
+→ Leave default (unchecked OR default settings)
+→ Click Next
+
+Default Stores:
+→ Virtual Hard Disk Location → leave default
+→ Virtual Machine Location → leave default
+→ Click Next
+
+Confirmation:
+→ Tick ✔ "Restart the destination server automatically if required"
+→ Click Install
+
+→ Wait for installation
+
+→ Server will restart automatically
+
+--------------------------------------------------------
+IMPORTANT ERROR FIX (VERY IMPORTANT FOR EXAM)
+--------------------------------------------------------
+IF ERROR:
+"Hypervisor is not running" OR VM not starting
+
+Steps:
+→ Shutdown VM
+
+→ Open Hyper-V Manager
+→ Right-click VM → Settings
+
+→ Go to:
+   Processor
+      → Expand
+
+→ Click:
+   "Compatibility"
+      → Tick ✔ "Expose virtualization extensions"
+
+→ Also check:
+   BIOS/UEFI
+      → Enable Virtualization Technology (VT-x / AMD-V)
+
+→ Apply → OK
+
+→ Start VM again
+
+--------------------------------------------------------
+3. CONFIGURATION (CREATE VIRTUAL MACHINE)
+--------------------------------------------------------
+
+Open:
+→ Server Manager
+→ Click "Tools"
+→ Select "Hyper-V Manager"
+
+→ Hyper-V Manager opens
+
+Left Panel:
+→ Click your Server Name (e.g., MASTER)
+
+Right Panel:
+→ Click "New"
+→ Select "Virtual Machine"
+
+Wizard Starts:
+
+--------------------------------
+Step 1: Before You Begin
+--------------------------------
+→ Click Next
+
+--------------------------------
+Step 2: Specify Name & Location
+--------------------------------
+→ Enter VM Name (e.g., VM1)
+→ Optional:
+   ✔ Store in different location
+      → Browse folder if needed
+→ Click Next
+
+--------------------------------
+Step 3: Specify Generation
+--------------------------------
+→ Generation 1 → Legacy (BIOS, 32-bit supported)
+→ Generation 2 → UEFI (64-bit, modern OS)
+
+→ Select:
+   ✔ Generation 2 (Recommended)
+
+→ Click Next
+
+--------------------------------
+Step 4: Assign Memory
+--------------------------------
+→ Enter RAM (e.g., 4096 MB = 4GB)
+
+→ Optional:
+   ✔ Use Dynamic Memory
+
+→ Click Next
+
+--------------------------------
+Step 5: Configure Networking
+--------------------------------
+→ Select Virtual Switch
+   (Created earlier using Ethernet)
+
+→ Example:
+   "Default Switch" or "External Switch"
+
+→ Click Next
+
+--------------------------------
+Step 6: Connect Virtual Hard Disk
+--------------------------------
+Options:
+→ Create new VHD
+→ Use existing VHD
+→ Attach later
+
+Recommended:
+→ Select "Create a virtual hard disk"
+
+→ Set:
+   Name: VM1.vhdx
+   Size: (e.g., 50 GB)
+
+→ Click Next
+
+--------------------------------
+Step 7: Installation Options
+--------------------------------
+Options:
+→ Install OS later
+→ Install from boot CD/DVD
+→ Install from ISO
+
+→ Select:
+   "Install from ISO image"
+
+→ Click Browse → Select OS ISO file
+
+→ Click Next
+
+--------------------------------
+Step 8: Summary
+--------------------------------
+→ Review all settings
+
+→ Click Finish
+
+--------------------------------------------------------
+4. START AND INSTALL OS
+--------------------------------------------------------
+
+→ In Hyper-V Manager
+→ Right-click VM (VM1)
+→ Click "Connect"
+
+→ New window opens
+
+→ Click "Start"
+
+→ OS Installation begins
+
+→ Follow OS setup (Next → Install → Partition → etc.)
+
+--------------------------------------------------------
+5. POST-INSTALL CONFIG
+--------------------------------------------------------
+
+→ Install Integration Services (if needed)
+
+→ Configure:
+   → Network
+   → IP Address
+   → Hostname
+
+→ Take snapshot (Checkpoint)
+
+Steps:
+→ Right-click VM
+→ Click "Checkpoint"
+
+--------------------------------------------------------
+6. IMPORTANT EXAM POINTS
+--------------------------------------------------------
+
+→ Hyper-V is Type-1 Hypervisor
+→ Uses Virtual Switch for networking
+→ Generation 2 uses UEFI
+→ VHDX supports larger disks than VHD
+→ Dynamic Memory improves efficiency
+
+--------------------------------------------------------
+FLOW SUMMARY (QUICK REVISION)
+--------------------------------------------------------
+
+Server Manager
+→ Manage
+→ Add Roles & Features
+→ Select Hyper-V
+→ Select NIC
+→ Install
+→ Restart
+
+→ Tools
+→ Hyper-V Manager
+→ New VM
+→ Name
+→ Generation
+→ Memory
+→ Network
+→ Disk
+→ ISO
+→ Finish
+
+→ Connect VM
+→ Start
+→ Install OS
+
+========================================================
+END OF LAB GUIDE
+========================================================

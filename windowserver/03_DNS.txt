@@ -1,0 +1,324 @@
+========================================================
+LAB: DNS CONFIGURATION (WINDOWS SERVER)
+SERVER NAME: MASTER
+IP: 192.168.119.128
+DOMAIN: sniper.com
+========================================================
+
+
+=========================
+PART 0: PRE-CONFIGURATION
+=========================
+
+Open → Server Manager
+    ↓
+Click → Local Server
+    ↓
+Click → Computer Name
+    ↓
+Change → Name = MASTER
+    ↓
+Click → OK
+    ↓
+Restart system
+
+----------------------------------------
+
+Set Static IP:
+
+Open → Control Panel
+    ↓
+Network and Sharing Center
+    ↓
+Click → Change Adapter Settings
+    ↓
+Right-click → Ethernet
+    ↓
+Click → Properties
+    ↓
+Select → Internet Protocol Version 4 (IPv4)
+    ↓
+Click → Properties
+    ↓
+Select → Use the following IP address
+
+IP Address: 192.168.119.128
+Subnet Mask: 255.255.255.0
+Default Gateway: 192.168.119.2
+
+Preferred DNS Server: 192.168.119.128
+
+    ↓
+Click → OK
+    ↓
+Click → Close
+
+
+=========================
+PART 1: INSTALL DNS ROLE
+=========================
+
+Open → Server Manager
+    ↓
+Click → Manage
+    ↓
+Click → Add Roles and Features
+
+[Before You Begin]
+    ↓
+Click → Next
+
+[Installation Type]
+    ↓
+Select → Role-based or feature-based installation
+    ↓
+Click → Next
+
+[Server Selection]
+    ↓
+Select → Select a server from the server pool
+    ↓
+Select → MASTER (192.168.119.128)
+    ↓
+Click → Next
+
+[Server Roles]
+    ↓
+Tick → DNS Server
+    ↓
+Popup appears → Click → Add Features
+    ↓
+Click → Next
+
+[Features]
+    ↓
+Click → Next
+
+[DNS Server]
+    ↓
+Click → Next
+
+[Confirmation]
+    ↓
+Tick → Restart the destination server automatically (if required)
+    ↓
+Click → Install
+
+Installation Progress...
+    ↓
+Click → Close
+
+
+=========================
+PART 2: OPEN DNS CONSOLE
+=========================
+
+Open → Server Manager
+    ↓
+Click → Tools (top-right)
+    ↓
+Click → DNS
+
+DNS Manager Window Opens
+
+
+===============================
+PART 3: FORWARD LOOKUP ZONE
+===============================
+
+DNS Manager
+    ↓
+Expand → MASTER (Server Name)
+    ↓
+Right-click → Forward Lookup Zones
+    ↓
+Click → New Zone
+
+[Welcome Wizard]
+    ↓
+Click → Next
+
+[Zone Type]
+    ↓
+Select → Primary Zone
+    ↓
+Click → Next
+
+[Zone Name]
+    ↓
+Enter → sniper.com
+    ↓
+Click → Next
+
+[Zone File]
+    ↓
+Select → Create a new file
+    ↓
+Auto file name → sniper.com.dns
+    ↓
+Click → Next
+
+[Dynamic Update]
+    ↓
+Select → Do not allow dynamic updates
+    ↓
+Click → Next
+
+[Summary]
+    ↓
+Click → Finish
+
+
+===============================
+PART 4: REVERSE LOOKUP ZONE
+===============================
+
+DNS Manager
+    ↓
+Right-click → Reverse Lookup Zones
+    ↓
+Click → New Zone
+
+[Welcome Wizard]
+    ↓
+Click → Next
+
+[Zone Type]
+    ↓
+Select → Primary Zone
+    ↓
+Click → Next
+
+[Reverse Lookup Zone Type]
+    ↓
+Select → IPv4 Reverse Lookup Zone
+    ↓
+Click → Next
+
+[Network ID]
+    ↓
+Enter → 192.168.119
+    ↓
+Click → Next
+
+[Zone File]
+    ↓
+Keep default (auto create)
+    ↓
+Click → Next
+
+[Dynamic Update]
+    ↓
+Select → Do not allow dynamic updates
+    ↓
+Click → Next
+
+[Summary]
+    ↓
+Click → Finish
+
+
+===============================
+PART 5: ADD A RECORD (A RECORD)
+===============================
+
+DNS Manager
+    ↓
+Expand → Forward Lookup Zones
+    ↓
+Click → sniper.com
+    ↓
+Right-click (inside right panel)
+    ↓
+Click → New Host (A or AAAA)
+
+[New Host Window]
+
+Name: master
+    ↓
+FQDN auto becomes → master.sniper.com
+
+IP Address: 192.168.119.128
+
+    ↓
+Tick → Create associated PTR record
+    ↓
+Click → Add Host
+    ↓
+Click → OK
+
+----------------------------------------
+
+Add WWW Record:
+
+Right-click → New Host (A or AAAA)
+
+Name: www
+IP Address: 192.168.119.128
+
+    ↓
+Click → Add Host
+    ↓
+Click → OK
+
+
+===============================
+PART 6: PTR RECORD (MANUAL)
+===============================
+
+DNS Manager
+    ↓
+Expand → Reverse Lookup Zones
+    ↓
+Click → 119.168.192.in-addr.arpa
+    ↓
+Right-click → New Pointer (PTR)
+
+[New PTR Window]
+
+Host IP Number: 192.168.119.128
+Host Name: master.sniper.com
+
+    ↓
+Click → OK
+
+
+===============================
+PART 7: VERIFY DNS
+===============================
+
+Open → Command Prompt
+    ↓
+Run commands:
+
+nslookup sniper.com
+nslookup www.sniper.com
+nslookup master.sniper.com
+nslookup 192.168.119.128
+
+
+===============================
+IMPORTANT EXAM NOTES
+===============================
+
+1. Take screenshots of:
+   - DNS Role installed
+   - Forward Lookup Zone
+   - Reverse Lookup Zone
+   - A Record (master, www)
+   - PTR Record
+
+2. Common mistakes:
+   - DNS not pointing to itself (127.0.0.1 or server IP)
+   - Forgot PTR checkbox
+   - Wrong zone name
+   - Typo in IP or domain
+
+3. If resolution fails:
+   - Restart DNS service
+   - Flush cache → ipconfig /flushdns
+   - Recheck A + PTR mapping
+
+========================================================
+END OF DNS CONFIGURATION
+========================================================

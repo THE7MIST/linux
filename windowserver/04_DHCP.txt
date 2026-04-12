@@ -1,0 +1,361 @@
+========================================================
+LAB: DHCP CONFIGURATION (WINDOWS SERVER)
+SERVER NAME: MASTER
+IP: 192.168.119.128
+DOMAIN: sniper.com
+========================================================
+
+
+=========================
+PART 0: PRE-CONFIGURATION
+=========================
+
+Ensure before DHCP:
+
+Server Name = MASTER
+    ↓
+Static IP configured:
+
+IP Address: 192.168.119.128
+Subnet Mask: 255.255.255.0
+Default Gateway: 192.168.119.2
+Preferred DNS: 192.168.119.128
+
+NOTE:
+DHCP server MUST have STATIC IP
+
+
+=========================
+PART 1: INSTALL DHCP ROLE
+=========================
+
+Open → Server Manager
+    ↓
+Click → Manage (top-right)
+    ↓
+Click → Add Roles and Features
+
+[Before You Begin]
+    ↓
+Click → Next
+
+[Installation Type]
+    ↓
+Select → Role-based or feature-based installation
+    ↓
+Click → Next
+
+[Server Selection]
+    ↓
+Select → Select a server from the server pool
+    ↓
+Select → MASTER (192.168.119.128)
+    ↓
+Click → Next
+
+[Server Roles]
+    ↓
+Tick → DHCP Server
+    ↓
+Popup → Click → Add Features
+    ↓
+Click → Next
+
+[Features]
+    ↓
+Click → Next
+
+[DHCP Server]
+    ↓
+Click → Next
+
+[Confirmation]
+    ↓
+(Optional) Tick → Restart automatically
+    ↓
+Click → Install
+
+Installation Progress...
+    ↓
+Click → Close
+
+
+===============================
+PART 2: COMPLETE DHCP SETUP
+===============================
+
+After installation:
+
+Server Manager (top notification flag)
+    ↓
+Click → Complete DHCP Configuration
+
+[Post-Install Configuration Wizard]
+    ↓
+Click → Next
+
+----------------------------------------
+
+[Authorization]
+
+IF SERVER IS STANDALONE:
+    ↓
+Select → Skip AD Authorization
+    ↓
+Click → Commit
+
+IF SERVER IS IN DOMAIN:
+    ↓
+Select → Use current credentials OR specify user
+    ↓
+Click → Commit
+
+----------------------------------------
+
+Wait → Configuration Success
+    ↓
+Click → Close
+
+
+===============================
+PART 3: OPEN DHCP CONSOLE
+===============================
+
+Open → Server Manager
+    ↓
+Click → Tools
+    ↓
+Click → DHCP
+
+DHCP Console Opens
+
+
+===============================
+PART 4: CREATE DHCP SCOPE
+===============================
+
+DHCP Console
+    ↓
+Expand → MASTER
+    ↓
+Expand → IPv4
+    ↓
+Right-click → IPv4
+    ↓
+Click → New Scope
+
+----------------------------------------
+
+[Welcome Wizard]
+    ↓
+Click → Next
+
+----------------------------------------
+
+[Scope Name]
+
+Name: First Pool
+Description: Creating new pool
+    ↓
+Click → Next
+
+----------------------------------------
+
+[IP Address Range]
+
+Start IP Address: 192.168.119.2
+End IP Address:   192.168.119.254
+
+Subnet Mask auto fills:
+255.255.255.0
+
+    ↓
+Click → Next
+
+----------------------------------------
+
+[Add Exclusions]
+
+Exclude reserved IPs:
+
+Start: 192.168.119.120
+End:   192.168.119.130
+
+    ↓
+Click → Add
+    ↓
+Click → Next
+
+----------------------------------------
+
+[Lease Duration]
+
+Default:
+8 Days
+
+(Leave as default)
+    ↓
+Click → Next
+
+----------------------------------------
+
+[Configure DHCP Options]
+
+Select → Yes, I want to configure these options now
+    ↓
+Click → Next
+
+----------------------------------------
+
+[Router (Default Gateway)]
+
+IP Address: 192.168.119.2
+    ↓
+Click → Add
+    ↓
+Click → Next
+
+----------------------------------------
+
+[Domain Name and DNS Servers]
+
+Parent Domain: sniper.com
+
+DNS Server:
+192.168.119.128
+    ↓
+Click → Add
+    ↓
+Click → Next
+
+----------------------------------------
+
+[WINS Servers]
+
+Leave empty
+    ↓
+Click → Next
+
+----------------------------------------
+
+[Activate Scope]
+
+Select → Yes, I want to activate this scope now
+    ↓
+Click → Next
+
+----------------------------------------
+
+[Completion]
+    ↓
+Click → Finish
+
+
+===============================
+PART 5: VERIFY DHCP SERVER
+===============================
+
+DHCP Console
+    ↓
+Expand → IPv4
+    ↓
+Click → Address Pool (check range)
+    ↓
+Click → Address Leases (should populate later)
+
+Check:
+Scope status = ACTIVE
+
+
+===============================
+PART 6: CLIENT CONFIGURATION
+===============================
+
+METHOD 1 (GUI):
+
+Open → Settings
+    ↓
+Network & Internet
+    ↓
+Click → Advanced Network Settings
+    ↓
+Click → Change Adapter Options
+    ↓
+Right-click → Ethernet
+    ↓
+Click → Properties
+    ↓
+Select → Internet Protocol Version 4 (IPv4)
+    ↓
+Click → Properties
+
+Select:
+    ● Obtain an IP address automatically
+    ● Obtain DNS server address automatically
+
+    ↓
+Click → OK
+    ↓
+Close
+
+----------------------------------------
+
+METHOD 2 (COMMAND LINE):
+
+Open → Command Prompt
+    ↓
+Run:
+
+ipconfig /release
+ipconfig /renew
+
+
+===============================
+PART 7: FINAL VERIFICATION
+===============================
+
+Open → Command Prompt
+    ↓
+Run:
+
+ipconfig
+
+----------------------------------------
+
+Verify:
+
+IP Address → Between 192.168.119.2 – 192.168.119.254
+NOT in excluded range
+
+Default Gateway → 192.168.119.2
+
+DNS Server → 192.168.119.128
+
+
+===============================
+IMPORTANT EXAM NOTES
+===============================
+
+1. Screenshots required:
+   - DHCP Role installation
+   - Scope creation wizard
+   - Address Pool
+   - Address Leases
+   - Client IP (ipconfig)
+
+2. Common mistakes:
+   - Forgot to activate scope
+   - Wrong IP range
+   - DNS not added
+   - Gateway missing
+   - Server using dynamic IP (WRONG)
+
+3. Troubleshooting:
+   - Restart DHCP service
+   - Disable/Enable client adapter
+   - Check firewall blocking DHCP
+   - Run: ipconfig /renew again
+
+========================================================
+END OF DHCP CONFIGURATION
+========================================================

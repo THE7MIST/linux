@@ -1,0 +1,190 @@
+========================================================
+WINDOWS SERVER BACKUP + RECOVERY (FULL GUI LAB GUIDE)
+========================================================
+
+LAB: Windows Server Backup Configuration & Recovery
+SERVER NAME: (example) MASTER
+NOTE: Add a NEW HARD DISK in VM before starting (for backup storage)
+
+========================================================
+PART 1: INSTALL WINDOWS SERVER BACKUP FEATURE
+========================================================
+
+Open Server Manager
+→ Click "Manage" (top-right corner)
+→ Click "Add Roles and Features"
+
+[Add Roles and Features Wizard Opens]
+
+→ Click "Next"
+→ Select "Role-based or feature-based installation"
+→ Click "Next"
+
+→ Select your Server (e.g., MASTER)
+→ Click "Next"
+
+→ Server Roles page
+→ Do NOT select anything
+→ Click "Next"
+
+→ Features page
+→ Scroll down
+→ Check "Windows Server Backup"
+→ Click "Next"
+
+→ Confirmation page
+→ Click "Install"
+
+→ Wait for installation to complete
+→ Click "Close"
+
+========================================================
+PART 2: BACKUP ONCE (MANUAL BACKUP)
+========================================================
+
+Open Server Manager
+→ Click "Tools"
+→ Click "Windows Server Backup"
+
+[Windows Server Backup Console Opens]
+
+→ Left Panel: Click "Local Backup"
+
+→ Right Panel (Actions)
+→ Click "Backup Once..."
+
+[Backup Once Wizard Opens]
+
+→ Select "Different options"
+→ Click "Next"
+
+→ Select Backup Configuration:
+   → Select "Full server"   (entire system backup)
+   OR
+   → Select "Custom" (if specific items needed)
+→ Click "Next"
+
+(IF Custom selected:)
+→ Click "Add Items"
+→ Select:
+   → Files and folders
+   → Volumes
+   → Applications
+   → System State
+→ Click "OK"
+→ Click "Next"
+
+→ Specify Backup Time:
+   → Select "Backup once"
+→ Click "Next"
+
+→ Specify Destination Type:
+   → Select "Local drives"
+   OR
+   → Select "Remote shared folder"
+→ Click "Next"
+
+(IF Local drives selected:)
+→ Select the newly added drive (e.g., Disk A:)
+→ Click "Next"
+
+(IF Remote shared folder selected:)
+→ Enter network path:
+   \\IP_ADDRESS\SharedFolder
+→ Provide credentials if prompted
+→ Click "Next"
+
+→ Confirmation Page:
+→ Verify all selections
+
+→ Click "Backup"
+
+→ Wait until status = "Backup completed successfully"
+
+========================================================
+PART 3: RECOVERY (RESTORE DATA)
+========================================================
+
+Open Server Manager
+→ Click "Tools"
+→ Click "Windows Server Backup"
+
+→ Left Panel: Click "Local Backup"
+
+→ Right Panel:
+→ Click "Recover..."
+
+[Recovery Wizard Opens]
+
+→ Select "This server"
+→ Click "Next"
+
+→ Select Backup Location:
+   → Local drives
+   OR
+   → Remote shared folder
+→ Click "Next"
+
+→ Select Backup Date:
+   → Use Calendar
+   → Select correct Date
+   → Select Time (backup version)
+→ Click "Next"
+
+→ Select Recovery Type:
+   → Files and folders
+   → Hyper-V
+   → Volumes
+   → Applications
+   → System state
+→ Click "Next"
+
+(IF Files and folders selected:)
+→ Browse and select required files/folders
+→ Click "Next"
+
+→ Specify Recovery Options:
+   → Original location
+   OR
+   → Alternate location
+
+(IF Alternate location:)
+→ Browse and select destination folder
+
+→ Click "Next"
+
+→ Confirmation Page:
+→ Review recovery details
+
+→ Click "Recover"
+
+→ Wait until recovery completes
+
+========================================================
+IMPORTANT NOTES (EXAM POINTS)
+========================================================
+
+• Always attach NEW DISK before backup
+• "Full Server Backup" = entire system image
+• Backup destination:
+   → Local drive (recommended in lab)
+   → Remote shared folder (network backup)
+
+• Recovery options:
+   → Original location (overwrite possible)
+   → Alternate location (safe option)
+
+• System State includes:
+   → Registry
+   → Boot files
+   → Active Directory (if present)
+
+• Common mistakes:
+   → Forgetting to add disk
+   → Selecting wrong backup type
+   → Not selecting correct date/time during recovery
+   → Network path incorrect (\\IP\Folder)
+
+========================================================
+END OF FILE
+========================================================
