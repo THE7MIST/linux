@@ -1,7 +1,7 @@
 ###############################
 # VSFTPD COMPLETE LAB GUIDE
 # Covers Q1–Q10 (Server + Client)
-# Each command includes:
+# Each command includes:    
 # WHY -> purpose
 # WHEN -> when to use
 # HOW -> what it does
