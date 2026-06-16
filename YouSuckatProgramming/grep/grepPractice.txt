@@ -112,3 +112,19 @@ Tr0p1c@l_F0r3st! - Good (Complexity added to normal words)
 xQ8#mL29@zW!vP - Strong (14 characters, completely random alphanumeric and symbols)
 admin - Weak (Default credential)
 9#mK!2xP - Good (Random mix, but under 10 characters)
+
+
+
+-------------------uperLower-----------------
+HELLO - Pure uppercase greeting
+hello - Pure lowercase greeting
+Hello - Capitalised greeting
+hElLo - Sarcastic mixed-case greeting
+SYSTEM_ERROR - Uppercase system constant
+system_error - Lowercase file variable
+SystemError - CamelCase class name
+API - Uppercase acronym
+api - Lowercase acronym
+DataStreamProcessor - Complex MixedCase identifier
+README - Standard uppercase documentation filename
+readme - Lowercase documentation filename
