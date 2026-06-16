@@ -1,0 +1,114 @@
+2026-06-15 08:12:04 [INFO] User admin logged in from IP 192.168.1.50
+2026-06-15 08:14:22 [WARNING] Disk space usage at 88% on /dev/sda1
+2026-06-15 08:15:01 [ERROR] Connection timed out to database server (db_master)
+2026-06-15 08:20:00 [info] Backup routine started successfully.
+2026-06-15 08:21:15 [CRITICAL] Out of memory error! Process killed: pid 4012
+2026-06-15 08:22:10 [ERROR] Failed login attempt for user 'guest' from 192.168.1.99
+2026-06-15 08:25:30 [INFO] User guest22 logged in from IP 192.168.1.55
+2026-06-15 08:30:11 [SUCCESS] Backup completed. Total size: 4.2GB
+2026-06-15 08:32:00 [DEBUG] Query executed: SELECT * FROM users WHERE id=10;
+2026-06-15 08:45:12 [ERROR] Database connection lost. Retrying...
+2026-06-15 08:45:15 [INFO] Reconnected to database server (db_master)
+
+Alice Smith, Active, US
+Bob Jones, Inactive, UK
+Charlie Brown, Active, CA
+Diana Prince, Pending, US
+Evan Wright, Active, AU
+Fiona Gallagher, Inactive, UK
+George Clark, Active, US
+Hannah Abbott, Active, UK
+Ian Malcolm, Pending, NZ
+Julia Roberts, Active, US
+Kevin Spacey, Inactive, CA
+Laura Croft, Active, UK
+Michael Jordan, Active, US
+Nina Simone, Pending, FR
+Oscar Wilde, Inactive, IE
+Paula Abdul, Active, US
+Quentin Tarantino, Active, US
+Rachel Green, Inactive, US
+Sam Winchester, Active, CA
+Tina Turner, Active, CH
+Umar Khan, Pending, PK
+Valerie Adams, Active, NZ
+William Shakespeare, Inactive, UK
+Xavier Charles, Active, FR
+Yusuf Islam, Active, UK
+Zoe Kravitz, Pending, US
+Alex Smith, Active, CA
+brian jones, Active, US
+charlie miller, Inactive, US
+David Smith, Active, UK
+
+
+----------------IP=--------------------------------------------------
+
+192.168.1.1 - Valid Private IPv4
+10.0.0.254 - Valid Private IPv4
+8.8.8.8 - Valid Public IPv4 (Google DNS)
+255.255.255.255 - Valid Broadcast IPv4
+0.0.0.0 - Valid Source IPv4
+999.1.1.1 - Invalid (Octet above 255)
+172.16.256.1 - Invalid (Octet above 255)
+192.168.1 - Invalid (Missing fourth octet)
+10.0.0.1.5 - Invalid (Too many octets)
+abc.def.ghi.jkl - Invalid (Contains letters)
+2001:0db8:85a3:0000:0000:8a2e:0370:7334 - Valid IPv6
+fe80::1 - Valid Compressed IPv6
+2001:db8::g123 - Invalid IPv6 (Contains 'g')
+123.456.78.90 - Invalid (Octet above 255)
+.1.2.3.4 - Invalid (Starts with a dot)
+192.168.01.1 - Invalid in some strict parsers (Leading zero)
+
+
+---------------mac-----------------------------------
+
+00:1A:2B:3C:4D:5E - Valid standard colon-separated
+a1-b2-c3-d4-e5-f6 - Valid standard hyphen-separated
+aabb.ccdd.eeff - Valid Cisco-style format
+001A2B3C4D5E - Valid flat format
+GG:1A:2B:3C:4D:5E - Invalid (Contains 'G' - hex stops at F)
+00:1A:2B:3C:4D - Invalid (Too short, missing last octet)
+00:1A:2B:3C:4D:5E:6F - Invalid (Too long, extra octet)
+00-1A-2B-3C-4D-5E - Valid standard uppercase hyphen
+4A:D2:E1:9F:8B:7C - Valid standard random uppercase
+12:34:56:78:90:G1 - Invalid (Contains 'G')
+aabbccddeeff - Valid flat lowercase
+aa:bb:cc:dd:ee:ff - Valid standard lowercase colon
+
+
+
+---------------------------email-----------------------------------------
+
+
+john.doe@example.com - Valid standard email
+jane_smith123@company.co.uk - Valid corporate email with subdomains
+support@sub.domain.org - Valid sub-domain email
+user+tag@gmail.com - Valid email with a plus tag extension
+admin@localhost - Valid internal domain (no TLD)
+@missing-local.com - Invalid (Missing local part before @)
+john.doe@ - Invalid (Missing domain part after @)
+jane.smith@com - Invalid (Missing domain name, only has TLD)
+spaces in@example.com - Invalid (Contains unquoted spaces)
+double@@example.com - Invalid (Contains multiple @ symbols)
+user@domain..com - Invalid (Contains consecutive dots)
+test.user@domain.c - Invalid TLD (Most strict parsers require 2+ letters)
+
+
+----------------------------password------------------------------------------
+
+
+
+password123 - Weak (Common word and sequential numbers)
+12345678 - Weak (Purely sequential numbers)
+qwerty - Weak (Keyboard sequence)
+P@ssword! - Weak (Common substitution pattern)
+johndoe1985 - Weak (Predictable name and birth year)
+C4t_W@lk_2026 - Good (Mix of case, numbers, symbols, but predictable structure)
+B7$mK9!vP2 - Strong (High entropy, random mix of case, digits, and symbols)
+correct horse battery staple - Good (Long passphrase, hard to guess, but no special characters)
+Tr0p1c@l_F0r3st! - Good (Complexity added to normal words)
+xQ8#mL29@zW!vP - Strong (14 characters, completely random alphanumeric and symbols)
+admin - Weak (Default credential)
+9#mK!2xP - Good (Random mix, but under 10 characters)
